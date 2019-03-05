@@ -1,12 +1,7 @@
 
 #include "../include/sampler_tx2.hpp"
 #include <stdexcept>
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/fcntl.h>
 
 using namespace plnr;
