@@ -7,9 +7,11 @@
 namespace plnr
 {
     enum class vectorn_flags { 
-        unflagged =     0, 
+        unflagged = 0, 
 
-        power = 1
+        power =     100,
+        power_cpu = 101,
+        power_gpu = 102,
     };
 
     /// Gives a point in n-dimensional space. The class stores a sequence of real numbers and defines operators enabling to treat such sequences as real vectors
