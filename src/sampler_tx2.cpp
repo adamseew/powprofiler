@@ -32,9 +32,9 @@ vectorn sampler_tx2::get_sample() {
 
     for (i = 0; i < SAMPLES_COUNT; i++) {
         lseek(file_descriptors[i], 0, 0);
-        if (bytes_read = read(file_descriptors[i], buffer, BUFFER_SIZE + 1) > 0) {
+        if ((bytes_read = read(file_descriptors[i], buffer, BUFFER_SIZE + 1)) > 0) {
             buffer[bytes_read] = 0;
-            power_sample.set(i, strtod(buffer, NULL), flags[i]);
+            power_sample.set(i, strtod(buffer, NULL) / 1000, flags[i]);
         } else
             throw std::runtime_error("unable to get data from file descriptor");
     } 

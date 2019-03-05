@@ -12,8 +12,8 @@ int main(int argc, char** argv) {
 
     sample = _sampler->get_sample();
 
-    cout << "power:\t\t"  << sample.get(vectorn_flags::power) << "\t"
-         << "power cpu:\t" << sample.get(vectorn_flags::power_cpu) << "\t"
+    cout << "power:\t\t"   << sample.get(vectorn_flags::power)     << endl
+         << "power cpu:\t" << sample.get(vectorn_flags::power_cpu) << endl
          << "power gpu:\t" << sample.get(vectorn_flags::power_gpu) << endl;
 
     return 0;
