@@ -1,3 +1,4 @@
+
 #include <vector>
 #include <string>
 
@@ -11,16 +12,12 @@ namespace plnr
     class pathn {
 
     private:
-        int                         _length;
-        std::vector<double>         _control;
-        std::vector<vectorn>        _path;
+        std::vector<vectorn>        path;
 
     public:
-        pathn(int __length, double* values);
-
-        pathn(int __length);
+        pathn(int _length, vectorn* values);
         
-        pathn(double value);
+        pathn(vectorn value);
 
         pathn(const pathn& _pathn);
 
@@ -30,28 +27,17 @@ namespace plnr
         
         const int length() const;
 
-        const double get(int index) const;
+        vectorn get(int index);
 
         void set(int index, double value);
 
-        const int path_length() const;
+        const int length() const;
 
-        vectorn path_get(int index);
-
-        void path_add(vectorn point);
+        void add(vectorn point);
 
         double abs();
 
         pathn* copy();
-
-        pathn& operator=(const pathn& _pathn);
-        pathn operator+(const pathn& _pathn) const;
-        pathn operator-(const pathn& _pathn) const;
-        pathn operator*(const double value) const;
-        pathn operator/(const double value) const;
-
-        friend pathn operator*(const double lhs, const pathn& rhs) { return rhs.operator*(lhs); }
-        friend pathn operator/(const double lhs, const pathn& rhs) { return rhs.operator/(lhs); } 
     };  
 }
 
