@@ -2,6 +2,7 @@
 #include "../include/profiler.hpp"
 
 #include <thread>
+#include <mutex> 
 
 using namespace plnr;
 using namespace std;
@@ -12,15 +13,27 @@ profiler::profiler(int _frequency, sampler* __sampler) {
 }
 
 pathn profiler::profile(std::string component, int milliseconds) {
-    pathn                   _profile;
+    
+    mutex                   _mutex;
 
     chrono::milliseconds    timespan(1000 / frequency);
     chrono::milliseconds    max_sampling_time(milliseconds);
+    
+    pathn                   _profile;
+    vectorn                 sample(_sampler->get_sample());
 
     std::thread             sampler_thread([&](){ 
-
-        _profile.add(_sampler->get_sample()); 
-        this_thread::sleep_for(timespan);
+        _mutex.lock();
+        sample = (sample + _sampler->get_sample()) / 2;
+        _mutex.unlock();
+    });
+    std::thread             profiler_thread([&](){ 
+        while (1) {
+            _mutex.lock();
+            _profile.add(sample); 
+            _mutex.unlock();
+            this_thread::sleep_for(timespan);
+        }
     });
     std::thread             benchmark_thread([&](){ system(component.c_str()); });
     
