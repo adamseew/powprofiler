@@ -17,7 +17,7 @@ using std::swap;
 
 pathn::pathn(int _length, vectorn* values) {
     for (int i = 0; i < _length; i++)
-        path.push_back(values[i]);
+        add(values[i]);
 }
 
 pathn::pathn(vectorn value) : pathn::pathn(1, &value) { }
@@ -32,36 +32,43 @@ pathn::~pathn() {
     vector<vectorn>().swap(path);
 }
 
-const int pathn::length() const {
-    return path.size();
-}
+const int pathn::length() const { return path.size(); }
 
 vectorn pathn::get(int index) {
     assert(index >= 0 && index < length());
     return path.at(index);
 }
 
-void pathn::set(int index, double value) {
+void pathn::set(int index, vectorn value) {
     assert(index >= 0 && index < length());
     path.at(index) = value;
 }
 
-const int pathn::length() const { return path.size(); }
-
-vectorn pathn::get(int index) {
-    assert(index >= 0 && index < path.size());
-    return path.at(index);
+void pathn::add(vectorn point) { 
+    if (path.size() > 0 && point.length() != get(0).length())
+        throw std::invalid_argument("points must have same size");
+        
+    path.push_back(point); 
 }
 
-void pathn::add(vectorn point) { path.push_back(point); }
-
-double pathn::abs() {
-    double sum = 0;
-    for (int i = 0; i < length(); i++) {
-        for (int j = 0; j < get(i).length(); j++)
-            sum += pow(get(i).get(j), 2);
+vectorn pathn::abs() {
+    vectorn _abs(get(0).length());
+    for (int i = 0; i < get(0).length(); i++) {
+        for (int j = 0; j < length(); j++)
+            _abs.set(i, _abs.get(i) + pow(get(j).get(i), 2));
+        _abs.set(i, sqrt(_abs.get(i)));
     }
-    return sqrt(sum);
+    return _abs;
+}
+
+vectorn pathn::avg() {
+    vectorn _avg(get(0).length());
+    for (int i = 0; i < get(0).length(); i++) {
+        for (int j = 0; j < length(); j++)
+            _avg.set(i, _avg.get(i) + get(j).get(i));
+        _avg.set(i, _avg.get(i) / length());
+    }
+    return _avg;
 }
 
 pathn* pathn::copy() { return new pathn(*this); }

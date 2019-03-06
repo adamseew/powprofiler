@@ -97,7 +97,7 @@ namespace plnr
         /// @param __flags  flags set with which a specific row has to be flagged
         void set_flag(int index, std::vector<vectorn_flags> __flags);
 
-        /// @brief Says whenever a specific index contains the desired flas
+        /// @brief Says whenever a specific index contains the desired flag
         /// @param index    index of the row
         /// @param flag     the flag to be checked
         /// @return         boolean value that says if flag is contained

@@ -29,15 +29,17 @@ namespace plnr
 
         vectorn get(int index);
 
-        void set(int index, double value);
-
-        const int length() const;
+        void set(int index, vectorn value);
 
         void add(vectorn point);
 
-        double abs();
+        vectorn abs();
+
+        vectorn avg();
 
         pathn* copy();
+
+        pathn& operator=(const pathn& _pathn);
     };  
 }
 
