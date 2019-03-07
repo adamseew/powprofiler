@@ -10,6 +10,9 @@
 namespace plnr 
 {
     class sampler_tx2 : public sampler {
+
+    private:
+        int file_descriptors[SAMPLES_COUNT];
         
     public:
         ~sampler_tx2();

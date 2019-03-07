@@ -6,7 +6,11 @@
 
 using namespace plnr;
 
-sampler_tx2::~sampler_tx2() { }
+sampler_tx2::~sampler_tx2() { 
+    file_descriptors[0] = open("/sys/bus/i2c/drivers/ina3221x/0-0041/iio_device/in_power0_input", O_RDONLY | O_NONBLOCK); // total power
+    file_descriptors[1] = open("/sys/bus/i2c/drivers/ina3221x/0-0041/iio_device/in_power1_input", O_RDONLY | O_NONBLOCK); // cpu power
+    file_descriptors[2] = open("/sys/bus/i2c/drivers/ina3221x/0-0040/iio_device/in_power0_input", O_RDONLY | O_NONBLOCK); // gpu power
+}
 
 vectorn sampler_tx2::get_sample() {
     int             i,
@@ -17,10 +21,6 @@ vectorn sampler_tx2::get_sample() {
     vectorn_flags   flags[SAMPLES_COUNT] =              { vectorn_flags::power,
                                                           vectorn_flags::power_cpu,
                                                           vectorn_flags::power_gpu };
-
-    file_descriptors[0] = open("/sys/bus/i2c/drivers/ina3221x/0-0041/iio_device/in_power0_input", O_RDONLY | O_NONBLOCK); // total power
-    file_descriptors[1] = open("/sys/bus/i2c/drivers/ina3221x/0-0041/iio_device/in_power1_input", O_RDONLY | O_NONBLOCK); // cpu power
-    file_descriptors[2] = open("/sys/bus/i2c/drivers/ina3221x/0-0040/iio_device/in_power0_input", O_RDONLY | O_NONBLOCK); // gpu power            
 
     if (file_descriptors[0] * file_descriptors[1] * file_descriptors[2] < 0)
         throw std::runtime_error("unable to open file descriptor");
