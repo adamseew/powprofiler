@@ -15,6 +15,8 @@ namespace plnr
         int file_descriptors[SAMPLES_COUNT];
         
     public:
+        sampler_tx2();
+
         ~sampler_tx2();
 
         virtual vectorn get_sample();

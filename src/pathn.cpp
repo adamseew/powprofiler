@@ -63,6 +63,7 @@ vectorn pathn::abs() {
 
 vectorn pathn::avg() {
     vectorn _avg(get(0).length());
+    _avg.inherit_flags(get(0));
     for (int i = 0; i < get(0).length(); i++) {
         for (int j = 0; j < length(); j++)
             _avg.set(i, _avg.get(i) + get(j).get(i));

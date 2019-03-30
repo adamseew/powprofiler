@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 
     sample = _sampler->get_sample();
 
-    cout << "general test on tx2"                                  << endl
+    cout << "general test on tx2 (1)"                              << endl
          << "power:\t\t"   << sample.get(vectorn_flags::power)     << endl
          << "power cpu:\t" << sample.get(vectorn_flags::power_cpu) << endl
          << "power gpu:\t" << sample.get(vectorn_flags::power_gpu) << endl;
@@ -31,12 +31,19 @@ int main(int argc, char** argv) {
 
     if (argc > 1) {
 
-        profile = _profiler->profile(argv[1]);
+        profile = _profiler->profile(argv[1], 10000);
 
-        cout << "power profile on tx2"                                     << endl
-             << "avg power:\t\t"   << sample.get(vectorn_flags::power)     << endl
-             << "avg power cpu:\t" << sample.get(vectorn_flags::power_cpu) << endl
-             << "avg power gpu:\t" << sample.get(vectorn_flags::power_gpu) << endl;
+        cout << "power profile on tx2"                                            << endl
+             << "avg power:\t\t"   << profile.avg().get(vectorn_flags::power)     << endl
+             << "avg power cpu:\t" << profile.avg().get(vectorn_flags::power_cpu) << endl
+             << "avg power gpu:\t" << profile.avg().get(vectorn_flags::power_gpu) << endl;
+
+        sample = _sampler->get_sample();
+
+        cout << "general test on tx2 (2)"                              << endl
+             << "power:\t\t"   << sample.get(vectorn_flags::power)     << endl
+             << "power cpu:\t" << sample.get(vectorn_flags::power_cpu) << endl
+             << "power gpu:\t" << sample.get(vectorn_flags::power_gpu) << endl;
 
         ofstream output_csv;
         output_csv.open(string(argv[1]).append("_profile.csv"));
