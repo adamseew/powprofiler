@@ -4,11 +4,19 @@
 
 #include <iostream>
 #include <fstream>
+#include <unistd.h>
+
+#include <sys/time.h>
+#include <sys/resource.h>
 
 using namespace plnr;
 using namespace std;
 
 int main(int argc, char** argv) {
+
+    /// setting priority to highest to cause more favorable scheduling
+
+    setpriority(PRIO_PROCESS, getpid(), -20);
     
     // testing if power sampling is working
 
@@ -31,7 +39,7 @@ int main(int argc, char** argv) {
 
     if (argc > 1) {
 
-        profile = _profiler->profile(argv[1], 10000);
+        profile = _profiler->profile(argv[1], 120000);
 
         cout << "power profile on tx2"                                            << endl
              << "avg power:\t\t"   << profile.avg().get(vectorn_flags::power)     << endl
@@ -61,6 +69,8 @@ int main(int argc, char** argv) {
 
     delete _sampler;
     delete _profiler;
+
+    exit(0);
 
     return 0;
 }
