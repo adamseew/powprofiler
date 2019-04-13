@@ -8,6 +8,7 @@ set(SOURCES
     src/pathn.cpp
     src/profiler.cpp
     src/sampler_tx2.cpp
+    src/soc_1resistor.cpp
     src/vectorn.cpp
 )
 

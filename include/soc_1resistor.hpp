@@ -16,10 +16,10 @@ namespace plnr
         double volt_internal;       // internal battery voltage
         double resistance_internal; // internal resistance of the battery
         double volt_stabilized;     // fixed value determined by the load of the system
+        double q_c;                 // battery capacity
 
     public:
-
-        soc_1resistor(pathn _curr_load, double _volt_internal, double, _resistance_internal, double _volt_stabilized);
+        soc_1resistor(pathn _curr_load, double _volt_internal, double _resistance_internal, double _volt_stabilized, double _q_c);
 
         ~soc_1resistor();
 
