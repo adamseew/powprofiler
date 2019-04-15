@@ -37,46 +37,40 @@ pathn::pathn(const std::string& file) {
 
     string                  line;
 
-    stringstream            _string_stream,
-                            __string_stream;
+    vectorn*                negative =      new vectorn();
 
-    vectorn*                negative =      new vectorn(),
-                            point;
     vector<vectorn_flags>   flags;
 
     getline(input_csv, line);
-    _string_stream = new string_stream(words);
 
-    while (getline(_string_stream, line, '\t')) {
+    for (auto _flags : utility_split(line, "\t")) {
+        if (flags.size() == 0)
+            throw logic_error("bad format, header column for one of the row does not contain any flag. At least one flag for each row must be specified. Row index=" + std::to_string(_length));
 
-        __string_stream = new string_stream(line);
-        while (getline(__string_stream, line, '+'))
+        for (auto _flag : utility_split(_flags, "+"))
             flags.push_back(static_cast<vectorn_flags>(stoi(line)));
 
-        if (flags.size() == 0)
-            throw logic_error("bad format, header column for one of the row does not contain any flag. At least one flag for each row must be specified. Row index=" + length);
-
-        negative->set(length++, 0.0, flags);
+        negative->set(_length++, 0.0, flags);
     }
 
-
     while (getline(input_csv, line)) {
+        vectorn*            point =         new vectorn(_length);
         ++row_length;
 
-        point = new vectorn(_length);
         __length = 0;
 
-        while (getline(_string_stream, line, "\t")) {
+        for (auto column : utility_split(line, "\t"))
             point->set(__length, atof(line), flags.at(__length++));
-        }
 
         if (_length != __length)
-            throw logic_error("bad format, at row=" + row_length + " columns expected=" + _length + " but parsed=" + __length);
+            throw logic_error("bad format, at row=" + std::to_string(row_length) + " columns expected=" + std::to_string(_length) + " but parsed=" + std::to_string(__length));
 
         point->inherit_flags(negative);
         add(point);
     }
 
+    delete _stringstream;
+    delete __stringstream;
     delete negative;
 }
 
@@ -94,7 +88,8 @@ void pathn::save() {
 }
 
 void pathn::save(const std::string& file) {
-    int         i;
+    int         i,
+                j;
 
     ofstream    output_csv;
 
@@ -103,14 +98,17 @@ void pathn::save(const std::string& file) {
     output_csv.open(string(argv[1]).append(file));
 
     for (i = 0; i < get(0).length(); i++) {
-        for (auto x : get(0).get_flag(i)) {
-            header_column << separator << x.specific_detail;
+        for (auto flag : get(0).get_flag(i)) {
+            header_column << separator << flag.specific_detail;
             separator = "+";
         }
         header_column << "\t";
     }
 
-    output_csv << header_column.pop_back().pop_back() << endl;
+    header_column.pop_back();
+    header_column.pop_back();
+
+    output_csv << header_column << endl;
 
     for (i = 0; i < length(); i++) {
         for (j = 0; j < get(0).length() - 1; j++)
@@ -134,35 +132,8 @@ void pathn::set(int index, vectorn value) {
 }
 
 void pathn::add(vectorn point) { 
-    int         i;
-
-    std::string log_data;
-    std::string separator =     "";
-
-    if (path.size() > 0) {
-        if (point.length() != get(0).length())
-            throw std::invalid_argument("points must have same size");
-        for (i == 0; i < point.length(); i++)
-            if (point.get_flag(i) != get(0).get_flag(i)) {
-
-                for (auto x : point.get_flag(i)) {
-                    log_data << separator << x.specific_detail;
-                    separator = ",";
-                }
-
-                log_data = "flag set fot " + i + " element of the point=[" + log_data + "], but expected=[";
-
-                separator = "";
-                for (auto x : get(0).get_flag(i)) {
-                    log_data << separator << x.specific_detail;
-                    separator = ",";
-                }
-
-                log_data << "]";
-
-                throw std::invalid_argument("flags do not match, the added point does not consitutes a path: " + log_data);
-            }
-    }
+    if (path.size() > 0 && point.length() != get(0).length())
+        throw std::invalid_argument("points must have same size");
         
     path.push_back(point); 
 }
@@ -194,4 +165,27 @@ pathn& pathn::operator=(const pathn& _pathn) {
     path  = _pathn.path;
 
     return *this;
+}
+
+std::vector<std::string> utility_split(std::string str, std::string token){
+    int             index;
+
+    vector<string>  _str;
+
+    while (str.size()) {
+
+        index = str.find(token);
+
+        if (index != string::npos) {
+            _str.push_back(str.substr(0, index));
+            str = str.substr(index + token.size());
+            if(str.size() == 0)
+                _str.push_back(str);
+        } else {
+            _str.push_back(str);
+            str = "";
+        }
+    }
+
+    return _str;
 }

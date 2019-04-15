@@ -14,6 +14,8 @@ namespace plnr
     private:
         std::vector<vectorn>        path;
 
+        std::vector<std::string> utility_split(std::string str, std::string token);
+
     public:
         pathn(int _length, vectorn* values);
         
@@ -30,8 +32,6 @@ namespace plnr
         void save();
 
         void save(const std::string& file);
-
-        void load();
         
         const int length() const;
 
