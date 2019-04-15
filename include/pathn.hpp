@@ -21,9 +21,17 @@ namespace plnr
 
         pathn(const pathn& _pathn);
 
+        pathn(const std::string& file);
+
         pathn();
 
         ~pathn();
+
+        void save();
+
+        void save(const std::string& file);
+
+        void load();
         
         const int length() const;
 

@@ -34,6 +34,8 @@ pathn profiler::profile(std::string component, int _milliseconds) {
     milliseconds    _last_result;
     milliseconds    start_time;
 
+    std::string     log_data;
+
     std::thread     sampler_thread([&](){ 
         start_time = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
         last_result = start_time;
@@ -84,10 +86,10 @@ pathn profiler::profile(std::string component, int _milliseconds) {
     /// a simple sanity check if the sampled frequeny i.e., the actual frequency of getting and storing the sample and the overall frequence i.e., the number of samples against inital and final interval is equal to the expected value
 
     if ((-1) * (overall_frequency + sampled_frequency) + 2 * frequency > 0) {
-        std::string log_data = "Frequency overall="         + std::to_string(overall_frequency) +
-                                       ", sampled(lowest)=" + std::to_string(sampled_frequency) +
-                                       ", avg="             + std::to_string(avg_frequency) +
-                                       ", but expected="    + std::to_string(frequency);
+        log_data = "Frequency overall="         + std::to_string(overall_frequency) +
+                           ", sampled(lowest)=" + std::to_string(sampled_frequency) +
+                           ", avg="             + std::to_string(avg_frequency) +
+                           ", but expected="    + std::to_string(frequency);
         throw std::out_of_range(
             "sampled frequency is different from the expected. Consider lowering the expected frequency. " + log_data
         );
