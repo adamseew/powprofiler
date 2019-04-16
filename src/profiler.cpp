@@ -9,16 +9,21 @@
 using namespace plnr;
 using namespace std::chrono;
 
+using std::string;
+using std::thread;
+using std::to_string;
+using std::numeric_limits;
+
 profiler::profiler(int _frequency, sampler* __sampler) {
     frequency = _frequency;
     _sampler = __sampler;
 }
 
-pathn profiler::profile(std::string component, int _milliseconds) {
+pathn profiler::profile(string component, int _milliseconds) {
     
     double          timespan =          1000 / frequency,
                     sampled_timespan =  0,
-                    sampled_frequency = std::numeric_limits<double>::max(),
+                    sampled_frequency = numeric_limits<double>::max(),
                     _sampled_frequency,
                     avg_frequency =     0,
                     overall_frequency;
@@ -26,7 +31,7 @@ pathn profiler::profile(std::string component, int _milliseconds) {
                     _samples_count =    1,
                     needed_samples =    _milliseconds > 0 ?
                                         _milliseconds / timespan :
-                                        std::numeric_limits<int>::max();
+                                        numeric_limits<int>::max();
     pathn           _profile;
     vectorn         sample(_sampler->get_sample());
 
@@ -34,9 +39,9 @@ pathn profiler::profile(std::string component, int _milliseconds) {
     milliseconds    _last_result;
     milliseconds    start_time;
 
-    std::string     log_data;
+    string          log_data;
 
-    std::thread     sampler_thread([&](){ 
+    thread          sampler_thread([&](){ 
         start_time = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
         last_result = start_time;
         while (1) {
@@ -63,9 +68,9 @@ pathn profiler::profile(std::string component, int _milliseconds) {
             if (samples_count == needed_samples)
                 return;
         }
-    });
+    }),
 
-    std::thread     benchmark_thread([&](){
+                    benchmark_thread([&](){
         system(component.c_str());
     });
     
@@ -86,10 +91,10 @@ pathn profiler::profile(std::string component, int _milliseconds) {
     /// a simple sanity check if the sampled frequeny i.e., the actual frequency of getting and storing the sample and the overall frequence i.e., the number of samples against inital and final interval is equal to the expected value
 
     if ((-1) * (overall_frequency + sampled_frequency) + 2 * frequency > 0) {
-        log_data = "Frequency overall="         + std::to_string(overall_frequency) +
-                           ", sampled(lowest)=" + std::to_string(sampled_frequency) +
-                           ", avg="             + std::to_string(avg_frequency) +
-                           ", but expected="    + std::to_string(frequency);
+        log_data = "Frequency overall="         + to_string(overall_frequency) +
+                           ", sampled(lowest)=" + to_string(sampled_frequency) +
+                           ", avg="             + to_string(avg_frequency) +
+                           ", but expected="    + to_string(frequency);
         throw std::out_of_range(
             "sampled frequency is different from the expected. Consider lowering the expected frequency. " + log_data
         );
@@ -98,6 +103,6 @@ pathn profiler::profile(std::string component, int _milliseconds) {
     return _profile;
 }
 
-pathn profiler::profile(std::string component) {
+pathn profiler::profile(string component) {
     return profiler::profile(component, 0);
 }

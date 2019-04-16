@@ -23,10 +23,14 @@ namespace plnr
         std::vector<std::vector<vectorn_flags>> _flags;
 
     public:
+        vectorn(int __length, double* values, std::vector<std::vector<vectorn_flags>> __flags);
+
         /// @brief Given a set of doubles and its length n, initializes a nx1 vector
         /// @param __length vector's length
         /// @param values   a set of doubles
         vectorn(int __length, double* values);
+
+        vectorn(int __length, std::vector<std::vector<vectorn_flags>> __flags);
 
         /// @brief Given a double, initializes a 1x1 vector
         /// @param value    value to assign to 1x1 vector

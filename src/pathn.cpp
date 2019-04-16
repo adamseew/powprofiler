@@ -11,11 +11,14 @@
 
 #include <sys/time.h>
 
-using namespace std;
 using namespace plnr;
 
 using std::vector;
 using std::swap;
+using std::string;
+using std::to_string;
+using std::logic_error;
+using std::endl;
 
 pathn::pathn(int _length, vectorn* values) {
     for (int i = 0; i < _length; i++)
@@ -28,50 +31,56 @@ pathn::pathn(const pathn& _pathn) {
     path = _pathn.path;
 }
 
-pathn::pathn(const std::string& file) {
-    ifstream                input_csv(file);
+pathn::pathn(const string& file) {
+    std::ifstream                   input_csv(file);
 
-    int                     _length =       0,
-                            __length,
-                            row_length =    0;
+    int                             _length =       0,
+                                    __length,
+                                    row_length =    0;
 
-    string                  line;
+    string                          line;
 
-    vectorn*                negative =      new vectorn();
+    vectorn*                        negative;
+    vectorn*                        point;
 
-    vector<vectorn_flags>   flags;
+    vector<vectorn_flags>*          _flags;
+    vector<vector<vectorn_flags>>   flags;
 
     getline(input_csv, line);
 
-    for (auto _flags : utility_split(line, "\t")) {
-        if (flags.size() == 0)
-            throw logic_error("bad format, header column for one of the row does not contain any flag. At least one flag for each row must be specified. Row index=" + std::to_string(_length));
+    for (auto __flags : utility_split(line, ",")) {
+        if (__flags.size() == 0)
+            throw logic_error("bad format, header column for one of the row does not contain any flag. At least one flag for each row must be specified. Row index=" + to_string(_length));
 
-        for (auto _flag : utility_split(_flags, "+"))
-            flags.push_back(static_cast<vectorn_flags>(stoi(line)));
+        _flags = new vector<vectorn_flags>();
 
-        negative->set(_length++, 0.0, flags);
+        for (auto flag : utility_split(__flags, "+"))
+            _flags->push_back(static_cast<vectorn_flags>(stoi(flag)));
+
+        flags.push_back(*_flags);
+        ++_length;
     }
 
+    negative = new vectorn(_length, flags);
+
     while (getline(input_csv, line)) {
-        vectorn*            point =         new vectorn(_length);
+        point = new vectorn(*negative);
         ++row_length;
 
         __length = 0;
 
-        for (auto column : utility_split(line, "\t"))
-            point->set(__length, atof(line), flags.at(__length++));
+        for (auto column : utility_split(line, ","))
+            point->set(__length++, atof(column.c_str()));
 
         if (_length != __length)
-            throw logic_error("bad format, at row=" + std::to_string(row_length) + " columns expected=" + std::to_string(_length) + " but parsed=" + std::to_string(__length));
+            throw logic_error("bad format, at row=" + to_string(row_length) + " column length expected=" + to_string(_length) + " but parsed=" + to_string(__length));
 
-        point->inherit_flags(negative);
-        add(point);
+        add(*point);
     }
 
-    delete _stringstream;
-    delete __stringstream;
     delete negative;
+
+    return;
 }
 
 pathn::pathn() { }
@@ -84,35 +93,34 @@ void pathn::save() {
     struct timeval  _timeval;
 
     gettimeofday(&_timeval, NULL);
-    save("profile_" + str(_timeval.tv_sec * 1000 + _timeval.tv_usec / 1000) + ".csv");
+    save("profile_" + to_string(_timeval.tv_sec * 1000 + _timeval.tv_usec / 1000) + ".csv");
 }
 
-void pathn::save(const std::string& file) {
-    int         i,
-                j;
+void pathn::save(const string& file) {
+    int             i,
+                    j;
 
-    ofstream    output_csv;
+    std::ofstream   output_csv;
 
-    string      header_column;
+    string          separator;
 
-    output_csv.open(string(argv[1]).append(file));
+    output_csv.open(file);
 
     for (i = 0; i < get(0).length(); i++) {
+        separator = "";
         for (auto flag : get(0).get_flag(i)) {
-            header_column << separator << flag.specific_detail;
+            output_csv << separator << static_cast<int>(flag);
             separator = "+";
         }
-        header_column << "\t";
+
+        if (i < get(0).length() - 1)
+            output_csv << ",";
     }
-
-    header_column.pop_back();
-    header_column.pop_back();
-
-    output_csv << header_column << endl;
+    output_csv << endl;
 
     for (i = 0; i < length(); i++) {
         for (j = 0; j < get(0).length() - 1; j++)
-            output_csv << get(i).get(j) << "\t";
+            output_csv << get(i).get(j) << ",";
         output_csv << get(i).get(j) << endl;
     }
 
@@ -167,7 +175,7 @@ pathn& pathn::operator=(const pathn& _pathn) {
     return *this;
 }
 
-std::vector<std::string> utility_split(std::string str, std::string token){
+vector<string> pathn::utility_split(string str, string token){
     int             index;
 
     vector<string>  _str;

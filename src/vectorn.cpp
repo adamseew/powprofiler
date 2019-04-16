@@ -8,28 +8,24 @@ using namespace plnr;
 
 using std::vector;
 using std::swap;
+using std::invalid_argument;
 
-vectorn::vectorn(int __length, double* values) {
+vectorn::vectorn(int __length, double* values, vector<vector<vectorn_flags>> __flags) {
+    assert(__flags.size() == __length);
     _length = __length;
     for (int i = 0; i < length(); i++) {
         _vector.push_back(values[i]);
-        vector<vectorn_flags> __vector;
-        __vector.push_back(vectorn_flags::unflagged);
-        _flags.push_back(__vector);
+        _flags.push_back(__flags.at(i));
     }
 }
+
+vectorn::vectorn(int __length, double* values) : vectorn::vectorn(__length, values, vector<vector<vectorn_flags>>(__length, vector<vectorn_flags>(1, vectorn_flags::unflagged))) { }
+
+vectorn::vectorn(int __length, std::vector<std::vector<vectorn_flags>> __flags) : vectorn::vectorn(__length, new double[__length] {0.0}, __flags) { }
 
 vectorn::vectorn(double value) : vectorn::vectorn(1, &value) { }
 
-vectorn::vectorn(int __length) {
-    _length = __length;
-    for (int i = 0; i < length(); i++) {
-        _vector.push_back(0.0);
-        vector<vectorn_flags> __vector;
-        __vector.push_back(vectorn_flags::unflagged);
-        _flags.push_back(__vector);
-    }
-}
+vectorn::vectorn(int __length) : vectorn::vectorn(__length, new double[__length] {0.0}) { }
 
 vectorn::vectorn(const vectorn& _vectorn) {
     _length = _vectorn._length;
@@ -57,7 +53,7 @@ const double vectorn::get(vectorn_flags flag) const {
             if (_flags[i].at(j) == flag)
                 return _vector.at(i);
 
-    throw std::invalid_argument("no position in vector match the flag");
+    throw invalid_argument("no position in vector match the flag");
 }
 
 const int vectorn::get_index(vectorn_flags flag) const { 
@@ -66,7 +62,7 @@ const int vectorn::get_index(vectorn_flags flag) const {
             if (_flags[i].at(j) == flag)
                 return i;
 
-    throw std::invalid_argument("no position in vector match the flag");
+    throw invalid_argument("no position in vector match the flag");
 }
 
 vector<vectorn_flags> vectorn::get_flag(int index) {

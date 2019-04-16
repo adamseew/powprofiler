@@ -6,6 +6,8 @@
 
 using namespace plnr;
 
+using std::runtime_error;
+
 sampler_tx2::sampler_tx2() {
     file_descriptors[0] = open("/sys/bus/i2c/drivers/ina3221x/0-0041/iio_device/in_power0_input", O_RDONLY | O_NONBLOCK); // total power
     file_descriptors[1] = open("/sys/bus/i2c/drivers/ina3221x/0-0041/iio_device/in_power1_input", O_RDONLY | O_NONBLOCK); // cpu power
@@ -28,7 +30,7 @@ vectorn sampler_tx2::get_sample() {
                                                           vectorn_flags::power_gpu };
 
     if (file_descriptors[0] * file_descriptors[1] * file_descriptors[2] < 0)
-        throw std::runtime_error("unable to open file descriptor");
+        throw runtime_error("unable to open file descriptor");
 
     for (i = 0; i < SAMPLES_COUNT; i++) {
         lseek(file_descriptors[i], 0, 0);
@@ -36,7 +38,7 @@ vectorn sampler_tx2::get_sample() {
             buffer[bytes_read] = 0;
             power_sample.set(i, strtod(buffer, NULL) / 1000, flags[i]);
         } else
-            throw std::runtime_error("unable to get data from file descriptor");
+            throw runtime_error("unable to get data from file descriptor");
     } 
 
     return power_sample;
