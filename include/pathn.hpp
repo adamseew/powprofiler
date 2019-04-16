@@ -29,9 +29,9 @@ namespace plnr
 
         ~pathn();
 
-        void save();
+        std::string save();
 
-        void save(const std::string& file);
+        std::string save(const std::string& file);
         
         const int length() const;
 

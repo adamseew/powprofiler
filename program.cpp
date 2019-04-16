@@ -1,4 +1,6 @@
 
+#include "include/integrator_rk4.hpp"
+#include "include/soc_1resistor.hpp"
 #include "include/sampler_tx2.hpp"
 #include "include/profiler.hpp"
 
@@ -14,59 +16,93 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
-    /// setting priority to highest to cause more favorable scheduling
+     /// setting priority to highest to cause more favorable scheduling
 
-    setpriority(PRIO_PROCESS, getpid(), -20);
+     setpriority(PRIO_PROCESS, getpid(), -20);
     
-    string      file;
-    vectorn     sample;
+     int                 i;
+     double              t0 =                0.0,
+                         t =                 1.0,
+                         h =                 1.0;
+     string              file;
+     vectorn             sample,
+                         start_soc,
+                         start_dsoc;
+     vectorn*            soc;
+     vectorn*            dsoc;
     
-    pathn*      profile;
-    sampler*    _sampler =  new sampler_tx2();
-    profiler*   _profiler = new profiler(10, _sampler);
+     pathn*              profile;
+     pathn*              profile_soc;
+
+     sampler*            _sampler =          new sampler_tx2();
+     profiler*           _profiler =         new profiler(10, _sampler);
+     first_derivative*   _first_derivative;
+     integrator_rk4*     _integrator_rk4;      
     
-    if (argc > 1) {
-        // testing if power sampling is working
+     if (argc > 1) {
+          // testing if power sampling is working
 
-        // just testing what happens before lunching the profiler
+          // just testing what happens before lunching the profiler
 
-        sample = _sampler->get_sample();
+          sample = _sampler->get_sample();
 
-        cout << "general test on tx2 (1)"                              << endl
-             << "power:\t\t"   << sample.get(vectorn_flags::power)     << endl
-             << "power cpu:\t" << sample.get(vectorn_flags::power_cpu) << endl
-             << "power gpu:\t" << sample.get(vectorn_flags::power_gpu) << endl;
+          cout << "general test on tx2 (1)"                              << endl
+               << "power:\t\t"   << sample.get(vectorn_flags::power)     << endl
+               << "power cpu:\t" << sample.get(vectorn_flags::power_cpu) << endl
+               << "power gpu:\t" << sample.get(vectorn_flags::power_gpu) << endl;
         
-        profile = new pathn(_profiler->profile(argv[1], 120000));
+          profile = new pathn(_profiler->profile(argv[1], 120000));
 
-        cout << "power profile on tx2"                                             << endl
-             << "avg power:\t\t"   << profile->avg().get(vectorn_flags::power)     << endl
-             << "avg power cpu:\t" << profile->avg().get(vectorn_flags::power_cpu) << endl
-             << "avg power gpu:\t" << profile->avg().get(vectorn_flags::power_gpu) << endl;
+          cout << "power profile on tx2"                                             << endl
+               << "avg power:\t\t"   << profile->avg().get(vectorn_flags::power)     << endl
+               << "avg power cpu:\t" << profile->avg().get(vectorn_flags::power_cpu) << endl
+               << "avg power gpu:\t" << profile->avg().get(vectorn_flags::power_gpu) << endl;
 
-        sample = _sampler->get_sample();
+          sample = _sampler->get_sample();
 
-        // and ahead: the values shuld be somehow similar
+          // and ahead: the values shuld be somehow similar
 
-        cout << "general test on tx2 (2)"                              << endl
-             << "power:\t\t"   << sample.get(vectorn_flags::power)     << endl
-             << "power cpu:\t" << sample.get(vectorn_flags::power_cpu) << endl
-             << "power gpu:\t" << sample.get(vectorn_flags::power_gpu) << endl;
+          cout << "general test on tx2 (2)"                              << endl
+               << "power:\t\t"   << sample.get(vectorn_flags::power)     << endl
+               << "power cpu:\t" << sample.get(vectorn_flags::power_cpu) << endl
+               << "power gpu:\t" << sample.get(vectorn_flags::power_gpu) << endl;
 
-        file = "profile_" + string(argv[1]) + ".csv";
-        profile->save(file);
+          file = "profile_" + string(argv[1]) + ".csv";
+          profile->save(file);
 
-        cout << "power profile saved in " << file << endl;
-    } else {
-        // testing if the model is working
+          cout << "power profile saved in " << file << endl;
+     } else {
+          // testing if the battery soc model is working
 
-        profile = new pathn("/home/user/pplanner/profiles/profile_nvx_sample_sfm.csv");
-        profile->save();
-    }
+          profile = new pathn("/home/user/pplanner/profiles/profile_nvx_sample_sfm.csv");
 
-    delete profile;
-    delete _sampler;
-    delete _profiler;
+          for (i = 0; i < profile->length(); i++) {
+               profile->set(i, profile->get(i) / 12);
+          }
 
-    exit(0);
+          _first_derivative = new soc_1resistor(*profile, 14.8, 0.0012, 12, 5);
+          
+          start_soc = profile->get(0);
+          start_dsoc = _first_derivative->get_value(t0, start_soc);
+
+          soc = new vectorn(start_soc.length());
+          dsoc = new vectorn(start_soc.length());
+
+          profile_soc = new pathn(start_soc);
+
+          _integrator_rk4 = new integrator_rk4(_first_derivative, t0, start_soc, h, start_dsoc);
+
+          while (t < profile->length() - 1) {
+               _integrator_rk4->step(&t, soc, dsoc);
+               profile_soc->add(*soc);
+          }
+
+          profile_soc->save();
+     }
+
+     delete profile;
+     delete _sampler;
+     delete _profiler;
+
+     exit(0);
 }

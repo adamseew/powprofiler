@@ -5,6 +5,7 @@ project (pplanner)
 
 set(SOURCES
     program.cpp
+    src/integrator_rk4.cpp
     src/pathn.cpp
     src/profiler.cpp
     src/sampler_tx2.cpp

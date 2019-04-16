@@ -89,14 +89,14 @@ pathn::~pathn() {
     vector<vectorn>().swap(path);
 }
 
-void pathn::save() {
+std::string pathn::save() {
     struct timeval  _timeval;
 
     gettimeofday(&_timeval, NULL);
-    save("profile_" + to_string(_timeval.tv_sec * 1000 + _timeval.tv_usec / 1000) + ".csv");
+    return save("profile_" + to_string(_timeval.tv_sec * 1000 + _timeval.tv_usec / 1000) + ".csv");
 }
 
-void pathn::save(const string& file) {
+std::string pathn::save(const string& file) {
     int             i,
                     j;
 
@@ -125,6 +125,8 @@ void pathn::save(const string& file) {
     }
 
     output_csv.close();
+
+    return file;
 }
 
 const int pathn::length() const { return path.size(); }
