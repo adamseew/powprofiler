@@ -128,6 +128,8 @@ namespace plnr
         vectorn& operator=(const vectorn& _vectorn);
         vectorn operator+(const vectorn& _vectorn) const;
         vectorn operator-(const vectorn& _vectorn) const;
+        vectorn operator+(const double value) const;
+        vectorn operator-(const double value) const;
         vectorn operator*(const double value) const;
         vectorn operator/(const double value) const;
 

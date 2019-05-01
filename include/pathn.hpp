@@ -33,9 +33,11 @@ namespace plnr
 
         std::string save(const std::string& file);
         
-        const int length() const;
+        const int columns() const;
 
-        vectorn get(int index);
+        const int rows() const;
+
+        const vectorn get(int index) const;
 
         void set(int index, vectorn value);
 
@@ -46,6 +48,9 @@ namespace plnr
         vectorn avg();
 
         pathn* copy();
+
+        pathn operator*(const double value) const;
+        pathn operator/(const double value) const;
 
         pathn& operator=(const pathn& _pathn);
     };  

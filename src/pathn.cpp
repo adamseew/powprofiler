@@ -106,20 +106,20 @@ std::string pathn::save(const string& file) {
 
     output_csv.open(file);
 
-    for (i = 0; i < get(0).length(); i++) {
+    for (i = 0; i < rows(); i++) {
         separator = "";
-        for (auto flag : get(0).get_flag(i)) {
+        for (auto flag : path.at(0).get_flag(i)) {
             output_csv << separator << static_cast<int>(flag);
             separator = "+";
         }
 
-        if (i < get(0).length() - 1)
+        if (i < rows() - 1)
             output_csv << ",";
     }
     output_csv << endl;
 
-    for (i = 0; i < length(); i++) {
-        for (j = 0; j < get(0).length() - 1; j++)
+    for (i = 0; i < columns(); i++) {
+        for (j = 0; j < rows() - 1; j++)
             output_csv << get(i).get(j) << ",";
         output_csv << get(i).get(j) << endl;
     }
@@ -129,29 +129,35 @@ std::string pathn::save(const string& file) {
     return file;
 }
 
-const int pathn::length() const { return path.size(); }
+const int pathn::columns() const { return path.size(); }
 
-vectorn pathn::get(int index) {
-    assert(index >= 0 && index < length());
+const int pathn::rows() const { 
+    assert (path.size() > 0);
+    
+    return path.at(0).length(); 
+}
+
+const vectorn pathn::get(int index) const {
+    assert(index >= 0 && index < columns());
     return path.at(index);
 }
 
 void pathn::set(int index, vectorn value) {
-    assert(index >= 0 && index < length());
+    assert(index >= 0 && index < columns());
     path.at(index) = value;
 }
 
 void pathn::add(vectorn point) { 
-    if (path.size() > 0 && point.length() != get(0).length())
+    if (path.size() > 0 && point.length() != rows())
         throw std::invalid_argument("points must have same size");
         
     path.push_back(point); 
 }
 
 vectorn pathn::abs() {
-    vectorn _abs(get(0).length());
-    for (int i = 0; i < get(0).length(); i++) {
-        for (int j = 0; j < length(); j++)
+    vectorn _abs(rows());
+    for (int i = 0; i < rows(); i++) {
+        for (int j = 0; j < columns(); j++)
             _abs.set(i, _abs.get(i) + pow(get(j).get(i), 2));
         _abs.set(i, sqrt(_abs.get(i)));
     }
@@ -159,12 +165,12 @@ vectorn pathn::abs() {
 }
 
 vectorn pathn::avg() {
-    vectorn _avg(get(0).length());
+    vectorn _avg(rows());
     _avg.inherit_flags(get(0));
-    for (int i = 0; i < get(0).length(); i++) {
-        for (int j = 0; j < length(); j++)
+    for (int i = 0; i < rows(); i++) {
+        for (int j = 0; j < columns(); j++)
             _avg.set(i, _avg.get(i) + get(j).get(i));
-        _avg.set(i, _avg.get(i) / length());
+        _avg.set(i, _avg.get(i) / columns());
     }
     return _avg;
 }
@@ -199,3 +205,14 @@ vector<string> pathn::utility_split(string str, string token){
 
     return _str;
 }
+
+pathn pathn::operator*(const double value) const {
+    pathn product;
+
+    for (int i = 0; i < columns(); i++)
+        product.add(value * this->get(i));
+
+    return product;
+}
+
+pathn pathn::operator/(const double value) const { return this->operator*(1.0 / value); }

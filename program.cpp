@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
      int                 i;
      double              t0 =                0.0,
                          t =                 1.0,
-                         h =                 1.0;
+                         h =                 0.001;
      string              file;
      vectorn             sample,
                          start_soc,
@@ -76,13 +76,13 @@ int main(int argc, char** argv) {
 
           profile = new pathn("/home/user/pplanner/profiles/profile_nvx_sample_sfm.csv");
 
-          for (i = 0; i < profile->length(); i++) {
-               profile->set(i, profile->get(i) / 12);
-          }
-
-          _first_derivative = new soc_1resistor(*profile, 14.8, 0.0012, 12, 5);
+          _first_derivative = new soc_1resistor(*profile / 12.0, 14.8, 0.0012, 12, 5);
           
-          start_soc = profile->get(0);
+          // starting for every column at 100 % of state of the charge and integrating downwards
+
+          start_soc = *new vectorn(profile->rows(), new double[profile->rows()] {0.0});
+          start_soc.inherit_flags(profile->get(0));
+          start_soc = start_soc + 100.0;
           start_dsoc = _first_derivative->get_value(t0, start_soc);
 
           soc = new vectorn(start_soc.length());
@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
 
           _integrator_rk4 = new integrator_rk4(_first_derivative, t0, start_soc, h, start_dsoc);
 
-          while (t < profile->length() - 1) {
+          while (t < profile->columns() - 1) {
                _integrator_rk4->step(&t, soc, dsoc);
                profile_soc->add(*soc);
           }

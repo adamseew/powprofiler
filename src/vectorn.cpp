@@ -29,8 +29,8 @@ vectorn::vectorn(int __length) : vectorn::vectorn(__length, new double[__length]
 
 vectorn::vectorn(const vectorn& _vectorn) {
     _length = _vectorn._length;
-    _vector = _vectorn._vector;
-    _flags = _vectorn._flags;
+    _vector  = *new vector<double>(_vectorn._vector);
+    _flags = *new vector<vector<vectorn_flags>>(_vectorn._flags);
 }
 
 vectorn::vectorn() : vectorn::vectorn(1) { }
@@ -157,8 +157,8 @@ vectorn* vectorn::copy() { return new vectorn(*this); }
 
 vectorn& vectorn::operator=(const vectorn& _vectorn) {
     _length = _vectorn._length;
-    _vector  = _vectorn._vector;
-    _flags = _vectorn._flags;
+    _vector  = *new vector<double>(_vectorn._vector);
+    _flags = *new vector<vector<vectorn_flags>>(_vectorn._flags);
 
     return *this;
 }
@@ -177,6 +177,19 @@ vectorn vectorn::operator+(const vectorn& _vectorn) const {
 }
 
 vectorn vectorn::operator-(const vectorn& _vectorn) const { return this->operator+(_vectorn.operator*(-1.0)); }
+
+vectorn vectorn::operator+(const double value) const {
+    double* values = (double*)malloc(sizeof(double) * length());
+    std::fill_n(values, length(), value);
+    
+    vectorn to_sum(length(), values);
+
+    delete values;
+
+    return to_sum + *this;
+}
+
+vectorn vectorn::operator-(const double value) const { return this->operator+(value*(-1.0)); }
 
 vectorn vectorn::operator*(const double value) const {
     double* values = (double*)malloc(sizeof(double) * length());
