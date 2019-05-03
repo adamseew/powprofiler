@@ -1,6 +1,8 @@
 
 #include "include/integrator_rk4.hpp"
 #include "include/soc_1resistor.hpp"
+#include "include/model_3layer.hpp"
+#include "include/model_1layer.hpp"
 #include "include/sampler_tx2.hpp"
 #include "include/profiler.hpp"
 
@@ -32,7 +34,7 @@ int main(int argc, char** argv) {
      vectorn*            dsoc;
     
      pathn*              profile;
-     pathn*              profile_soc;
+     pathn*              _model_1layer;
 
      sampler*            _sampler =          new sampler_tx2();
      profiler*           _profiler =         new profiler(10, _sampler);
@@ -72,35 +74,15 @@ int main(int argc, char** argv) {
 
           cout << "power profile saved in " << file << endl;
      } else {
-          // testing if the battery soc model is working
+          _model_1layer = (new model_1layer())->get_model();
 
-          profile = new pathn("/home/user/pplanner/profiles/profile_nvx_sample_sfm.csv");
+          _first_derivative = new soc_1resistor(*_model_1layer / 12.0, 14.8, 0.0012, 12, 5);
 
-          _first_derivative = new soc_1resistor(*profile / 12.0, 14.8, 0.0012, 12, 5);
-          
-          // starting for every column at 100 % of state of the charge and integrating downwards
-
-          start_soc = *new vectorn(profile->rows(), new double[profile->rows()] {0.0});
-          start_soc.inherit_flags(profile->get(0));
-          start_soc = start_soc + 100.0;
-          start_dsoc = _first_derivative->get_value(t0, start_soc);
-
-          soc = new vectorn(start_soc.length());
-          dsoc = new vectorn(start_soc.length());
-
-          profile_soc = new pathn(start_soc);
-
-          _integrator_rk4 = new integrator_rk4(_first_derivative, t0, start_soc, h, start_dsoc);
-
-          while (t < profile->columns() - 1) {
-               _integrator_rk4->step(&t, soc, dsoc);
-               profile_soc->add(*soc);
-          }
-
-          profile_soc->save();
+          (new model_3layer(_model_1layer, _first_derivative, h))->get_model()->save();
      }
 
      delete profile;
+     delete _model_1layer;
      delete _sampler;
      delete _profiler;
 
