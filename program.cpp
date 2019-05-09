@@ -26,7 +26,9 @@ int main(int argc, char** argv) {
      // double              t0 =                0.0,
      //                     t =                 1.0;
      double              h =                 0.01;
-     string              arguments =         "";
+     string              arguments =         "",
+                         file_name_1layer,
+                         file_name_3layer;
      // string              file;
      // vectorn             sample,
      //                     start_soc,
@@ -85,12 +87,16 @@ int main(int argc, char** argv) {
               arguments += " " + string(argv[i]);
 
           _model_1layer = (new model_1layer(argv[1], arguments, _profiler))->get_model();
-          _model_1layer->save();
+          file_name_1layer = _model_1layer->save();
 
           _first_derivative = new soc_1resistor(*_model_1layer / 12.0, 14.8, 0.0012, 12, 5);
 
           _model_3layer = (new model_3layer(_model_1layer, _first_derivative, h))->get_model();
-          _model_3layer->save();
+          file_name_3layer = _model_3layer->save();
+
+          // todo plotting the result of the 1st and 3rd layer model
+
+          system(("../plot.sh " + string(argv[1]) + " " + file_name_1layer + " " + file_name_3layer).c_str());
      }
 
      delete _model_1layer;

@@ -32,7 +32,7 @@ namespace plnr
         std::string save();
 
         std::string save(const std::string& file);
-        
+
         const int columns() const;
 
         const int rows() const;
