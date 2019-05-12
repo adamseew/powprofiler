@@ -78,6 +78,8 @@ pathn::pathn(const string& file) {
         add(*point);
     }
 
+    delete _flags;
+    delete point;
     delete negative;
 
     return;

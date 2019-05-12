@@ -44,6 +44,7 @@ pathn* model_3layer::get_model() {
         _model_3layer->add(*y);
     }
 
+
     delete y;
     delete dy;
     delete _integrator_rk4;
