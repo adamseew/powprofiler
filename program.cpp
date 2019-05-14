@@ -5,6 +5,7 @@
 #include "include/model_1layer.hpp"
 #include "include/sampler_tx2.hpp"
 #include "include/profiler.hpp"
+#include "include/config.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -37,6 +38,7 @@ int main(int argc, char** argv) {
      // vectorn*            dsoc;
     
      // pathn*              profile;
+     config*             _config;
      pathn*              _model_1layer;
      pathn*              _model_3layer;
 
@@ -80,6 +82,8 @@ int main(int argc, char** argv) {
      // }
 
      if (argc >= 2) {
+          _config = new config("/home/user/pplanner/config.cfg");
+          _config->load();
 
           // todo model_1layer is just a wrapper that reads a specific power profile from file
 

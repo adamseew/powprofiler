@@ -1,4 +1,5 @@
 
+#include "../include/utility.hpp"
 #include "../include/pathn.hpp"
 
 #include <iostream>
@@ -48,13 +49,13 @@ pathn::pathn(const string& file) {
 
     getline(input_csv, line);
 
-    for (auto __flags : utility_split(line, ",")) {
+    for (auto __flags : utility_split(line, ',')) {
         if (__flags.size() == 0)
             throw logic_error("bad format, header column for one of the row does not contain any flag. At least one flag for each row must be specified. Row index=" + to_string(_length));
 
         _flags = new vector<vectorn_flags>();
 
-        for (auto flag : utility_split(__flags, "+"))
+        for (auto flag : utility_split(__flags, '+'))
             _flags->push_back(static_cast<vectorn_flags>(stoi(flag)));
 
         flags.push_back(*_flags);
@@ -69,7 +70,7 @@ pathn::pathn(const string& file) {
 
         __length = 0;
 
-        for (auto column : utility_split(line, ","))
+        for (auto column : utility_split(line, ','))
             point->set(__length++, atof(column.c_str()));
 
         if (_length != __length)
@@ -183,29 +184,6 @@ pathn& pathn::operator=(const pathn& _pathn) {
     path  = _pathn.path;
 
     return *this;
-}
-
-vector<string> pathn::utility_split(string str, string token){
-    int             index;
-
-    vector<string>  _str;
-
-    while (str.size()) {
-
-        index = str.find(token);
-
-        if (index != string::npos) {
-            _str.push_back(str.substr(0, index));
-            str = str.substr(index + token.size());
-            if(str.size() == 0)
-                _str.push_back(str);
-        } else {
-            _str.push_back(str);
-            str = "";
-        }
-    }
-
-    return _str;
 }
 
 pathn pathn::operator*(const double value) const {

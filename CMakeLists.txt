@@ -5,6 +5,7 @@ project (pplanner)
 
 set(SOURCES
     program.cpp
+    src/config.cpp
     src/integrator_rk4.cpp
     src/model_1layer.cpp
     src/model_3layer.cpp
@@ -12,6 +13,7 @@ set(SOURCES
     src/profiler.cpp
     src/sampler_tx2.cpp
     src/soc_1resistor.cpp
+    src/utility.cpp
     src/vectorn.cpp
 )
 
