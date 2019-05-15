@@ -24,7 +24,7 @@ config::~config() {
 }
 
 void config::load() {
-    std::ifstream   input_cfg(file);
+    std::ifstream       input_cfg(file);
 
     int                 line_number =       0,
                         components_count =  0;
@@ -64,13 +64,24 @@ void config::load() {
         property_value.at(1) = utility_trim(property_value.at(1));
 
         if (trim_compare(property_value.at(0), "frequency"))
-            frequency = stoi(property_value.at(1));
+            try {
+                frequency = stoi(property_value.at(1));
+            } catch (exception &_exception) {
+                throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected integer value but found " + line);    
+            }
 
         else if (trim_compare(property_value.at(0), "h"))
-            h = stof(property_value.at(1));
+            try {
+                h = stof(property_value.at(1));
+            } catch (exception &_exception) {
+                throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected float value but found " + line);    
+            }
 
         else if (trim_compare(property_value.at(0), "directory"))
             directory = property_value.at(1);
+        else
+            throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Property " + utility_trim(property_value.at(0)) + " not recognized");
+        
     }
 
     read_format_line(input_cfg, line, line_number);
@@ -99,7 +110,8 @@ void config::load() {
             throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected property=value but found " + line);
 
         _component.src = utility_trim(property_value.at(1));
-        _component.arguments.clear();
+        _component.fixed_arguments.clear();
+        _component.range_arguments.clear();
 
         // expecting a number of possible arguments. min,max,step for each argument         
 
@@ -113,30 +125,41 @@ void config::load() {
             if (property_value.size() != 2)
                 throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected property=value but found " + line);
 
-            property_value = utility_split(property_value.at(1), ',');
+            if (trim_compare(property_value.at(0), "range")) {
 
-            if (property_value.size() != 3)
-                throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected value,value,value but found " + line);
+                property_value = utility_split(property_value.at(1), ',');
 
-            _component.arguments.push_back(stoi(utility_trim(property_value.at(0))));
-            _component.arguments.push_back(stoi(utility_trim(property_value.at(1))));
-                
-            try {
-                property_value.at(2) = utility_trim(property_value.at(2));
+                if (property_value.size() != 3)
+                    throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected value,value,value but found " + line);
 
-                if (property_value.at(2)[0] == 'p') {
-                    property_value = utility_split(property_value.at(2), '(');
+                try {
+                    _component.range_arguments.push_back(stoi(utility_trim(property_value.at(0))));
+                    _component.range_arguments.push_back(stoi(utility_trim(property_value.at(1))));
+                } catch (exception &_exception) {
+                    throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected integer value but found " + line);    
+                }
 
-                    // if the line start by p, it means that a pow operator is involed. To save this operator into the data struct, the integer is stored as negative (just for convenience!)
+                try {
+                    property_value.at(2) = utility_trim(property_value.at(2));
 
-                    _component.arguments.push_back(
-                        (-1) * stoi(property_value.at(1).substr(0, property_value.at(1).size()))
-                    );
-                } else
-                    _component.arguments.push_back(stoi(property_value.at(2)));
+                    if (property_value.at(2)[0] == 'p') {
+                        property_value = utility_split(property_value.at(2), '(');
 
-            } catch (exception &_exception) {
-                throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected value or pow(value) but found " + line);
+                        // if the line start by p, it means that a pow operator is involed. To save this operator into the data struct, the integer is stored as negative (just for convenience!)
+
+                        _component.range_arguments.push_back(
+                            (-1) * stoi(property_value.at(1).substr(0, property_value.at(1).size()))
+                        );
+                    } else
+                        _component.range_arguments.push_back(stoi(property_value.at(2)));
+
+                } catch (exception &_exception) {
+                    throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected value or pow(value) with integer value but found " + line);
+                }
+            } else if (trim_compare(property_value.at(0), "fixed")) {
+                _component.fixed_arguments.push_back(utility_trim(property_value.at(1)));
+            } else {
+                throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Property " + utility_trim(property_value.at(0)) + " not recognized");
             }
         }
 
