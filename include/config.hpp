@@ -25,6 +25,7 @@ namespace plnr
 
         void read_format_line(std::ifstream& file, std::string &line, int &line_number);
         bool trim_compare(const std::string& _left, const std::string& _right);
+        bool file_exists(const std::string& name);
 
     public:
 

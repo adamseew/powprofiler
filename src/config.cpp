@@ -3,12 +3,14 @@
 #include "../include/config.hpp"
 
 #include <fstream>
+#include <sys/stat.h>
 
 using namespace plnr;
 
 using std::vector;
 using std::string;
 using std::runtime_error;
+using std::logic_error;
 using std::to_string;
 using std::exception;
 
@@ -27,7 +29,10 @@ void config::load() {
     std::ifstream       input_cfg(file);
 
     int                 line_number =       0,
-                        components_count =  0;
+                        components_count =  0,
+                        min,
+                        max,
+                        step;
 
     string              line;
     vector<string>      property_value;
@@ -66,6 +71,8 @@ void config::load() {
         if (trim_compare(property_value.at(0), "frequency"))
             try {
                 frequency = stoi(property_value.at(1));
+                if (frequency <= 0)
+                    throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Frequency must be a positive integer");        
             } catch (exception &_exception) {
                 throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected integer value but found " + line);    
             }
@@ -73,12 +80,15 @@ void config::load() {
         else if (trim_compare(property_value.at(0), "h"))
             try {
                 h = stof(property_value.at(1));
+                if (frequency <= 0)
+                    throw runtime_error("configuration file bad format line " + to_string(line_number) + ". H must be a positive float");        
             } catch (exception &_exception) {
                 throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected float value but found " + line);    
             }
 
         else if (trim_compare(property_value.at(0), "directory"))
             directory = property_value.at(1);
+
         else
             throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Property " + utility_trim(property_value.at(0)) + " not recognized");
         
@@ -110,6 +120,10 @@ void config::load() {
             throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected property=value but found " + line);
 
         _component.src = utility_trim(property_value.at(1));
+
+        if (!file_exists(_component.src))
+            throw logic_error("configuration file error line " + to_string(line_number) + ". Source file " + _component.src + " does not exist");
+
         _component.fixed_arguments.clear();
         _component.range_arguments.clear();
 
@@ -133,8 +147,10 @@ void config::load() {
                     throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected value,value,value but found " + line);
 
                 try {
-                    _component.range_arguments.push_back(stoi(utility_trim(property_value.at(0))));
-                    _component.range_arguments.push_back(stoi(utility_trim(property_value.at(1))));
+                    min = stoi(utility_trim(property_value.at(0)));
+                    max = stoi(utility_trim(property_value.at(1)));
+                    _component.range_arguments.push_back(min);
+                    _component.range_arguments.push_back(max);
                 } catch (exception &_exception) {
                     throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected integer value but found " + line);    
                 }
@@ -146,12 +162,13 @@ void config::load() {
                         property_value = utility_split(property_value.at(2), '(');
 
                         // if the line start by p, it means that a pow operator is involed. To save this operator into the data struct, the integer is stored as negative (just for convenience!)
-
-                        _component.range_arguments.push_back(
-                            (-1) * stoi(property_value.at(1).substr(0, property_value.at(1).size()))
-                        );
-                    } else
-                        _component.range_arguments.push_back(stoi(property_value.at(2)));
+                        
+                        step = (-1) * stoi(property_value.at(1).substr(0, property_value.at(1).size()));
+                        _component.range_arguments.push_back(step);
+                    } else {
+                        step = stoi(property_value.at(2));
+                        _component.range_arguments.push_back(step);
+                    }
 
                 } catch (exception &_exception) {
                     throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected value or pow(value) with integer value but found " + line);
@@ -160,6 +177,9 @@ void config::load() {
                 _component.fixed_arguments.push_back(utility_trim(property_value.at(1)));
             } else {
                 throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Property " + utility_trim(property_value.at(0)) + " not recognized");
+            }
+            if ((max - min) < 0 || (max - min) < step || (step < 0 && (max - min) < step * step ) ) {
+                throw logic_error("configuration file error line " + to_string(line_number) + ". Invalid format for range argument. Use min,max,step pattern (step can be an integer or a power expressed as pow(step) )");
             }
         }
 
@@ -171,7 +191,7 @@ void config::load() {
     }
     
     if (components_count < 1)
-        throw runtime_error("configuration file bad format line " + to_string(line_number) + ". At least one component expected");
+        throw logic_error("configuration file error line " + to_string(line_number) + ". At least one component expected");
 
 }
 
@@ -193,4 +213,11 @@ void config::read_format_line(std::ifstream& file, string &line, int &line_numbe
 bool config::trim_compare(const string& _left, const string& _right) {
    
     return utility_trim(_left).compare(_right) == 0;
+}
+
+
+bool config::file_exists(const std::string& name) {
+
+    struct stat buffer;   
+    return (stat (name.c_str(), &buffer) == 0); 
 }
