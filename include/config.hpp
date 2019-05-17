@@ -11,21 +11,24 @@ namespace plnr
     
     private:
         struct component {
-        std::string                     name,
-                                        src;
-        std::vector<int>                range_arguments;
-        std::vector<std::string>        fixed_arguments;    };
+        std::string                         name,
+                                            src;
+        std::vector<std::string>            fixed_arguments;
+        std::vector<int>                    range_arguments;    
+        std::vector<std::pair<int, int> >   positions;      };
 
-        std::vector<struct component>   settings;
+        std::vector<struct component>       settings;
+        std::vector<std::string>            configurations;
 
-        std::string                     file,
-                                        directory;
-        int                             frequency;
-        double                          h;
+        std::string                         file,
+                                            directory;
+        int                                 frequency;
+        double                              h;
 
         void read_format_line(std::ifstream& file, std::string &line, int &line_number);
         bool trim_compare(const std::string& _left, const std::string& _right);
         bool file_exists(const std::string& name);
+        void nested_combinations(struct component _component, std::string result_nested, std::vector<std::string>& combinations, int i, int shift, int last);
 
     public:
 
@@ -34,6 +37,8 @@ namespace plnr
         ~config();
 
         void load();
+
+        std::vector<std::string> get_configurations();
     };
 }
 

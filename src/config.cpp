@@ -2,17 +2,19 @@
 #include "../include/utility.hpp"
 #include "../include/config.hpp"
 
-#include <fstream>
 #include <sys/stat.h>
+#include <fstream>
+#include <cmath> 
 
 using namespace plnr;
 
-using std::vector;
-using std::string;
 using std::runtime_error;
 using std::logic_error;
 using std::to_string;
 using std::exception;
+using std::vector;
+using std::string;
+using std::pair;
 
 config::config(const string& _file) {
     frequency = 10;
@@ -26,18 +28,20 @@ config::~config() {
 }
 
 void config::load() {
-    std::ifstream       input_cfg(file);
+    std::ifstream               input_cfg(file);
 
-    int                 line_number =       0,
-                        components_count =  0,
-                        min,
-                        max,
-                        step;
+    int                         i,
+                                line_number =       0,
+                                components_count =  0,
+                                min,
+                                max,
+                                step;
+    bool                        was_previous_range;
 
-    string              line;
-    vector<string>      property_value;
+    string                      line;
+    vector<string>              property_value;
 
-    struct component    _component;
+    struct component            _component;
 
     read_format_line(input_cfg, line, line_number);
 
@@ -126,6 +130,8 @@ void config::load() {
 
         _component.fixed_arguments.clear();
         _component.range_arguments.clear();
+        _component.positions.clear();
+        was_previous_range = false;
 
         // expecting a number of possible arguments. min,max,step for each argument         
 
@@ -140,6 +146,13 @@ void config::load() {
                 throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected property=value but found " + line);
 
             if (trim_compare(property_value.at(0), "range")) {
+                
+                if (was_previous_range)
+                    _component.positions.at(_component.positions.size() - 1).first = _component.range_arguments.size() + 3;
+                else
+                    _component.positions.emplace_back(_component.range_arguments.size() + 3, _component.range_arguments.size());
+
+                was_previous_range = true;
 
                 property_value = utility_split(property_value.at(1), ',');
 
@@ -164,22 +177,29 @@ void config::load() {
                         // if the line start by p, it means that a pow operator is involed. To save this operator into the data struct, the integer is stored as negative (just for convenience!)
                         
                         step = (-1) * stoi(property_value.at(1).substr(0, property_value.at(1).size()));
-                        _component.range_arguments.push_back(step);
-                    } else {
+                    } else
                         step = stoi(property_value.at(2));
-                        _component.range_arguments.push_back(step);
-                    }
+                    
+                    _component.range_arguments.push_back(step);
 
                 } catch (exception &_exception) {
                     throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected value or pow(value) with integer value but found " + line);
                 }
             } else if (trim_compare(property_value.at(0), "fixed")) {
+                _component.positions.emplace_back(0, _component.fixed_arguments.size());
+                was_previous_range = false;
+
                 _component.fixed_arguments.push_back(utility_trim(property_value.at(1)));
+
             } else {
                 throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Property " + utility_trim(property_value.at(0)) + " not recognized");
             }
-            if ((max - min) < 0 || (max - min) < step || (step < 0 && (max - min) < step * step ) ) {
-                throw logic_error("configuration file error line " + to_string(line_number) + ". Invalid format for range argument. Use min,max,step pattern (step can be an integer or a power expressed as pow(step) )");
+            if ((max - min) < 0 || 
+                (step > 0 && (max - min) < step) || 
+                (step < 0 && (max - min) < step * step ||
+                step == 0
+               )) {
+                throw logic_error("configuration file error line " + to_string(line_number) + ". Invalid format for range argument. Use min,max,step pattern (step can be a positive integer or a power expressed as pow(step) )");
             }
         }
 
@@ -193,6 +213,82 @@ void config::load() {
     if (components_count < 1)
         throw logic_error("configuration file error line " + to_string(line_number) + ". At least one component expected");
 
+}
+
+vector<string> config::get_configurations() {
+    if (configurations.size() == 0) {
+        int             i;
+
+        vector<string>  combinations,
+                        _configurations,
+                        __configurations; 
+
+        for (auto _component : settings) {
+
+
+            _configurations.clear();
+            _configurations.push_back(_component.src);
+
+            for (auto position : _component.positions) {
+                if (position.first == 0)
+                    for (i = 0; i < _configurations.size(); i++)
+                        _configurations.at(i) += " " + _component.fixed_arguments.at(position.second);
+
+                else {
+                    combinations.clear();
+                    nested_combinations(_component, "", combinations, _component.range_arguments.at(position.second), position.second, position.first); 
+                    __configurations.clear();
+                    for (i = 0; i < _configurations.size(); i++) {
+                        for (auto combination : combinations)
+                            __configurations.push_back(_configurations.at(i) + " " + combination);
+                    }
+                    if (__configurations.size() > _configurations.size()) {
+                        _configurations.clear();
+                        _configurations.insert(_configurations.end(), __configurations.begin(), __configurations.end());
+                    }
+                }
+            }
+            
+            configurations.insert(configurations.end(), _configurations.begin(), _configurations.end());        
+        }
+    }
+    
+    return configurations;
+}
+
+void config::nested_combinations(struct component _component, string result_nested, vector<string>& combinations, int i, int shift, int last) {
+    
+    if ((_component.range_arguments.at(2 + shift) > 0 
+            && i <= _component.range_arguments.at(1 + shift)) ||
+        (_component.range_arguments.at(2 + shift) <  0 
+            && i <= _component.range_arguments.at(1 + shift)
+       )) {
+        if (shift + 3 < last)
+            nested_combinations(_component, 
+                                result_nested + " " + to_string(i), 
+                                combinations, 
+                                _component.range_arguments.at(3 + shift), 
+                                3 + shift, 
+                                last
+            );
+        else
+            combinations.push_back(result_nested + " " + to_string(i));
+
+        nested_combinations(_component, 
+                            result_nested, 
+                            combinations,
+                            _component.range_arguments.at(2 + shift) > 0 ?
+                                abs(i) + _component.range_arguments.at(2 + shift) 
+                            :
+                                i == 0  ?
+                                    (-1) * _component.range_arguments.at(2 + shift)
+                                :
+                                    (-1) * abs(i) * _component.range_arguments.at(2 + shift),
+                            shift, 
+                            last
+        );
+    }        
+    
 }
 
 void config::read_format_line(std::ifstream& file, string &line, int &line_number) {

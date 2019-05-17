@@ -84,6 +84,7 @@ int main(int argc, char** argv) {
      if (argc >= 2) {
           _config = new config("/home/user/pplanner/config.cfg");
           _config->load();
+          vector<string> configurations = _config->get_configurations();
 
           // todo model_1layer is just a wrapper that reads a specific power profile from file
 
