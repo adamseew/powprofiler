@@ -194,12 +194,13 @@ void config::load() {
             } else {
                 throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Property " + utility_trim(property_value.at(0)) + " not recognized");
             }
-            if ((max - min) < 0 || 
+            if ( max < 0 || 
+                 min < 0 ||
+                (max - min) < 0 || 
                 (step > 0 && (max - min) < step) || 
-                (step < 0 && (max - min) < step * step ||
-                step == 0
+                (step < 0 && (max - min) < step * step
                )) {
-                throw logic_error("configuration file error line " + to_string(line_number) + ". Invalid format for range argument. Use min,max,step pattern (step can be a positive integer or a power expressed as pow(step) )");
+                throw logic_error("configuration file error line " + to_string(line_number) + ". Invalid format for range argument. Use min,max,step pattern where min,max are positive integers, step can be a natural or a power expressed as pow(step)");
             }
         }
 
