@@ -28,20 +28,20 @@ config::~config() {
 }
 
 void config::load() {
-    std::ifstream               input_cfg(file);
+    std::ifstream       input_cfg(file);
 
-    int                         i,
-                                line_number =       0,
-                                components_count =  0,
-                                min,
-                                max,
-                                step;
-    bool                        was_previous_range;
+    int                 i,
+                        line_number =       0,
+                        components_count =  0,
+                        min,
+                        max,
+                        step;
+    bool                was_previous_range;
 
-    string                      line;
-    vector<string>              property_value;
+    string              line;
+    vector<string>      property_value;
 
-    struct component            _component;
+    struct component    _component;
 
     read_format_line(input_cfg, line, line_number);
 
@@ -136,7 +136,7 @@ void config::load() {
         // expecting a number of possible arguments. min,max,step for each argument         
 
         for (read_format_line(input_cfg, line, line_number);
-             line[0] != '[' && !input_cfg.eof();
+             line[0] != '[';
              read_format_line(input_cfg, line, line_number)
             ) {
 
@@ -202,6 +202,9 @@ void config::load() {
                )) {
                 throw logic_error("configuration file error line " + to_string(line_number) + ". Invalid format for range argument. Use min,max,step pattern where min,max are positive integers, step can be a natural or a power expressed as pow(step)");
             }
+
+            if (input_cfg.peek() == EOF)
+                break;
         }
 
         settings.push_back(_component);
@@ -214,48 +217,85 @@ void config::load() {
     if (components_count < 1)
         throw logic_error("configuration file error line " + to_string(line_number) + ". At least one component expected");
 
+    input_cfg.close();
+
 }
 
-vector<string> config::get_configurations() {
+void config::configure() {
     if (configurations.size() == 0) {
-        int             i;
+        int                     i,
+                                j,
+                                k;
 
-        vector<string>  combinations,
-                        _configurations,
-                        __configurations; 
+        vector<string>          arguments_combinations,
+                                component_configurations,
+                                _component_configurations;
+        
+        vector<vector<string> > _configurations;
 
         for (auto _component : settings) {
 
 
-            _configurations.clear();
-            _configurations.push_back(_component.src);
+            component_configurations.clear();
+            component_configurations.push_back(_component.src);
 
             for (auto position : _component.positions) {
                 if (position.first == 0)
-                    for (i = 0; i < _configurations.size(); i++)
-                        _configurations.at(i) += " " + _component.fixed_arguments.at(position.second);
+                    for (i = 0; i < component_configurations.size(); i++)
+                        component_configurations.at(i) += " " + _component.fixed_arguments.at(position.second);
 
                 else {
-                    combinations.clear();
-                    nested_combinations(_component, "", combinations, _component.range_arguments.at(position.second), position.second, position.first); 
-                    __configurations.clear();
-                    for (i = 0; i < _configurations.size(); i++) {
-                        for (auto combination : combinations)
-                            __configurations.push_back(_configurations.at(i) + " " + combination);
+                    arguments_combinations.clear();
+                    nested_combinations(_component, "", arguments_combinations, _component.range_arguments.at(position.second), position.second, position.first); 
+                    _component_configurations.clear();
+                    for (i = 0; i < component_configurations.size(); i++) {
+                        for (auto combination : arguments_combinations)
+                            _component_configurations.push_back(component_configurations.at(i) + " " + combination);
                     }
-                    if (__configurations.size() > _configurations.size()) {
-                        _configurations.clear();
-                        _configurations.insert(_configurations.end(), __configurations.begin(), __configurations.end());
+                    if (_component_configurations.size() > component_configurations.size()) {
+                        component_configurations.clear();
+                        component_configurations.insert(component_configurations.end(), _component_configurations.begin(), _component_configurations.end());
                     }
                 }
             }
+
+            _configurations.push_back(component_configurations);
+        }
+        
+        // todo
+        //nested_configurations(_configurations, configurations, 0);
+
+        /*for (i = 0; i < _configurations.at(0).size(); i++) {
+            for (j = 0; j < _configurations.at(1).size(); j++) {
+                for (k = 0; k < _configurations.at(2).size(); k++) {
+                    configurations.push_back(vector<string>({
+                        _configurations.at(0).at(i), 
+                        _configurations.at(1).at(j),
+                        _configurations.at(2).at(k)
+                    }));
+                }
+            }
+        }*/
+    }
+}
+
+// todo
+/*string config::nested_configurations(vector<vector<string> > __configurations, vector<vector<string> >& _configurations, int l) {
+
+    int i;
+
+    if (l + 1 < __configurations.size()) {
+        for (i = 0; i < __configurations.at(l).size(); i++) {
+            _configurations.push_back(vector<string>({
+                __configurations.at(l).at(i), nested_configurations(__configurations, _configurations, l + 1)
+            }));
             
-            configurations.insert(configurations.end(), _configurations.begin(), _configurations.end());        
+            return  __configurations.at(l).at(i);
         }
     }
-    
-    return configurations;
-}
+
+    return "";
+}*/
 
 void config::nested_combinations(struct component _component, string result_nested, vector<string>& combinations, int i, int shift, int last) {
     
