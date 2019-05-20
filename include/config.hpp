@@ -29,7 +29,7 @@ namespace plnr
         bool trim_compare(const std::string& _left, const std::string& _right);
         bool file_exists(const std::string& name);
         void nested_combinations(struct component _component, std::string result_nested, std::vector<std::string>& combinations, int i, int shift, int last);
-        std::string nested_configurations(std::vector<std::vector<std::string> > __configurations, std::vector<std::vector<std::string> >& _configurations, int l);
+        void nested_configurations(std::vector<std::vector<std::string> > __configurations, std::vector<std::vector<std::string> >& _configurations, std::vector<std::string> result_nested, int i, int l);
 
     public:
 

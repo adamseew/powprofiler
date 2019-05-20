@@ -28,6 +28,9 @@ config::~config() {
 }
 
 void config::load() {
+    if (!file_exists(file))
+        throw logic_error("configuration file " + file + " does not exist");
+
     std::ifstream       input_cfg(file);
 
     int                 i,
@@ -265,37 +268,55 @@ void config::configure() {
         // todo
         //nested_configurations(_configurations, configurations, 0);
 
-        /*for (i = 0; i < _configurations.at(0).size(); i++) {
+        //nested_configurations(_configurations, configurations, vector<string>(), 0, 0);
+
+        for (i = 0; i < _configurations.at(0).size(); i++) {
+            
+            vector<string> ri;
+            ri.push_back({_configurations.at(0).at(i)});
+
             for (j = 0; j < _configurations.at(1).size(); j++) {
+                
+                vector<string> rj(ri);
+                rj.push_back({_configurations.at(1).at(j)});
+
+
                 for (k = 0; k < _configurations.at(2).size(); k++) {
+
+                    vector<string> rk(rj);
+                    rk.push_back({_configurations.at(2).at(k)}); 
+                    
                     configurations.push_back(vector<string>({
-                        _configurations.at(0).at(i), 
-                        _configurations.at(1).at(j),
-                        _configurations.at(2).at(k)
+                        rk
                     }));
                 }
             }
-        }*/
+        }
+        i = 0;
     }
 }
 
 // todo
-/*string config::nested_configurations(vector<vector<string> > __configurations, vector<vector<string> >& _configurations, int l) {
+void config::nested_configurations(vector<vector<string> > __configurations, vector<vector<string> >& _configurations, vector<string> result_nested, int i, int l) {
 
-    int i;
+    if (i < __configurations.at(l).size()) {
+        
+        vector<string> rn(result_nested);
+        rn.push_back({__configurations.at(l).at(i)});
 
-    if (l + 1 < __configurations.size()) {
-        for (i = 0; i < __configurations.at(l).size(); i++) {
-            _configurations.push_back(vector<string>({
-                __configurations.at(l).at(i), nested_configurations(__configurations, _configurations, l + 1)
-            }));
-            
-            return  __configurations.at(l).at(i);
-        }
+        if (l + 1 < __configurations.size())
+            nested_configurations(__configurations, _configurations, rn, i, l + 1);
+        else
+            configurations.push_back(vector<string>({rn}))
+            ;
+        
+        //result_nested.clear();
+        nested_configurations(__configurations, _configurations, rn, i + 1, l);
+               
     }
-
-    return "";
-}*/
+    
+    
+}
 
 void config::nested_combinations(struct component _component, string result_nested, vector<string>& combinations, int i, int shift, int last) {
     
