@@ -6,10 +6,11 @@ gnuplot -e "
 	set dgrid3d 30,30 splines;
 	set logscale x 2;
 	set multiplot;
-	set ytics 30,10,60;
+	set ytics 2,2,10;
 	set xtics center offset 0,-0.5;
 	set ytics center offset 0,-0.5;
 	set zlabel 'Power (W)' rotate by 90;
+	set view 75,25;
 	splot '$2' w l notitle lc rgb '#000000';
 	set cbrange [0:10];
 	set cblabel 'SoC (%)' offset 0.0,0.0;

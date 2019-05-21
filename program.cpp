@@ -52,13 +52,13 @@ int main(int argc, char** argv) {
           output_csv1.open(string(argv[2]) + "_1layer.csv");
           output_csv2.open(string(argv[2]) + "_3layer.csv");
 
-          // change i to fit the x axis in the surface
+          // change i to fit the x axis in the surface, i.e., matrix size
 
-          for (i = 1024; i <= 4096; i *= 2) {
+          for (i = 256; i <= 4096; i *= 2) {
 
-              // change j to fit the y axis in the surface
+              // change j to fit the y axis in the surface, i.e., exponent
 
-              for (j = 0; j <= 10; j += 2) {
+              for (j = 20; j <= 60; j += 10) {
 
                   // sampling data about power evolution and fitting model
 
@@ -92,8 +92,10 @@ int main(int argc, char** argv) {
 
                   // saving data for the surface
 
+                  // last_3layer / 10 => gnuplot need to build two plots some normalized values (quick fix)
+
                   output_csv1 << i << " " << j << " " << avg_1layer << endl;
-                  output_csv2 << i << " " << j << " " << last_3layer << endl;
+                  output_csv2 << i << " " << j << " " << last_3layer / 10 << endl;
 
               }
           }
@@ -108,7 +110,6 @@ int main(int argc, char** argv) {
 
      delete _sampler;
      delete _profiler;
-     delete _first_derivative;
 
      exit(0);
 }
