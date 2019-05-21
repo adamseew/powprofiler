@@ -1,6 +1,7 @@
 
 #include "pathn.hpp"
 #include "sampler.hpp"
+#include "config.hpp"
 
 #ifndef PLNR_PROFILER_H
 #define PLNR_PROFILER_H
@@ -14,6 +15,8 @@ namespace plnr
         sampler*    _sampler;
 
     public:
+        profiler(config* _config, sampler* __sampler);
+
         profiler(int _frequency, sampler* __sampler);
 
         pathn profile(std::string component, int milliseconds);

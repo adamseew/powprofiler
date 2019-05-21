@@ -31,12 +31,18 @@ int main(int argc, char** argv) {
      pathn*              _model_1layer;
      pathn*              _model_3layer;
 
-     sampler*            _sampler =          new sampler_tx2();
-     profiler*           _profiler =         new profiler(10, _sampler);
      first_derivative*   _first_derivative;
 
      std::ofstream       output_csv1,
                          output_csv2;
+
+     config*             _config =           new config("/home/nvidia/pplanner/config2.cfg");
+     sampler*            _sampler;
+     profiler*           _profiler;
+
+     _config->load();
+     _sampler =                              new sampler_tx2();
+     _profiler =                             new profiler(_config, _sampler);
 
      // first parameter is the sample to profile
      // second parameter is the name of the sample, i.e., matrix-multiplication
@@ -48,7 +54,7 @@ int main(int argc, char** argv) {
 
           // change i to fit the x axis in the surface
 
-          for (i = 256; i <= 4096; i *= 2) {
+          for (i = 1024; i <= 4096; i *= 2) {
 
               // change j to fit the y axis in the surface
 

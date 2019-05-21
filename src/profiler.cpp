@@ -14,6 +14,11 @@ using std::thread;
 using std::to_string;
 using std::numeric_limits;
 
+profiler::profiler(config* _config, sampler* __sampler) {
+    frequency = _config->get_frequency();
+    _sampler = __sampler;
+}
+
 profiler::profiler(int _frequency, sampler* __sampler) {
     frequency = _frequency;
     _sampler = __sampler;

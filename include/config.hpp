@@ -37,6 +37,10 @@ namespace plnr
 
         ~config();
 
+        double get_frequency();
+
+        double get_h();
+
         void load();
 
         void configure();

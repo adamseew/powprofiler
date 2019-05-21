@@ -27,6 +27,14 @@ config::~config() {
     vector<struct component>().swap(settings);
 }
 
+double config::get_frequency() {
+    return frequency;
+}
+
+double config::get_h() {
+    return h;
+}
+
 void config::load() {
     if (!file_exists(file))
         throw logic_error("configuration file " + file + " does not exist");
