@@ -24,6 +24,10 @@ profiler::profiler(int _frequency, sampler* __sampler) {
     _sampler = __sampler;
 }
 
+profiler::~profiler() { 
+    delete _sampler;
+}
+
 pathn profiler::profile(string component, int _milliseconds) {
     
     double          timespan =          1000 / frequency,

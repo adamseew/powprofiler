@@ -8,7 +8,7 @@
 
 namespace plnr
 {
-    class model_3layer : public model {
+    class model_battery : public model {
 
     private:
         double              h;
@@ -17,9 +17,11 @@ namespace plnr
         first_derivative*   _first_derivative;
 
     public:
-        model_3layer(pathn* __model_1layer, first_derivative* __first_derivative, double _h);
+        model_battery(config* _config, pathn* __model_1layer, first_derivative* __first_derivative);
 
-        ~model_3layer();
+        model_battery(pathn* __model_1layer, first_derivative* __first_derivative, double _h);
+
+        ~model_battery();
 
         virtual pathn* get_model();
     };

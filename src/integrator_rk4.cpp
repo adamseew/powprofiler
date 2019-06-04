@@ -5,6 +5,14 @@
 
 using namespace plnr;
 
+integrator_rk4::integrator_rk4(config* _config, first_derivative* __first_derivative, double _t0, vectorn _y0, vectorn _dy0) {
+    _first_derivative = __first_derivative;
+    t0 = _t0;
+    y0 = _y0.copy();
+    h = _config->get_h();
+    dy0 = _dy0.copy();
+}
+
 integrator_rk4::integrator_rk4(first_derivative* __first_derivative, double _t0, vectorn _y0, double _h, vectorn _dy0) {
     _first_derivative = __first_derivative;
     t0 = _t0;

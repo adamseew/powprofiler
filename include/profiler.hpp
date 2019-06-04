@@ -18,6 +18,8 @@ namespace plnr
         profiler(config* _config, sampler* __sampler);
 
         profiler(int _frequency, sampler* __sampler);
+        
+        ~profiler();
 
         pathn profile(std::string component, int milliseconds);
 

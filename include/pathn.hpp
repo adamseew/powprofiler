@@ -45,6 +45,8 @@ namespace plnr
 
         vectorn avg();
 
+        vectorn sum();
+
         pathn* copy();
 
         pathn operator*(const double value) const;

@@ -1,20 +1,26 @@
 
-#include "../include/model_3layer.hpp"
+#include "../include/model_battery.hpp"
 
 using namespace plnr;
 
-model_3layer::model_3layer(pathn* __model_1layer, first_derivative* __first_derivative, double _h) {
+model_battery::model_battery(config* _config, pathn* __model_1layer, first_derivative* __first_derivative) {
+    _model_1layer = __model_1layer;
+    _first_derivative = __first_derivative;
+    h = _config->get_h();
+}
+
+model_battery::model_battery(pathn* __model_1layer, first_derivative* __first_derivative, double _h) {
     _model_1layer = __model_1layer;
     _first_derivative = __first_derivative;
     h = _h;
 }
 
-model_3layer::~model_3layer() {
+model_battery::~model_battery() {
     delete _model_1layer;
     delete _first_derivative;
 }
 
-pathn* model_3layer::get_model() {
+pathn* model_battery::get_model() {
     double          t =                 1.0,
                     t0 =                0.0;
 
@@ -24,7 +30,7 @@ pathn* model_3layer::get_model() {
     vectorn*        y;
     vectorn*        dy;
 
-    pathn*          _model_3layer;
+    pathn*          _model_battery;
     integrator_rk4* _integrator_rk4;
 
     start_y = *new vectorn(_model_1layer->rows(), new double[_model_1layer->rows()] {0.0});
@@ -32,7 +38,7 @@ pathn* model_3layer::get_model() {
     start_y = start_y + 100.0;
     start_dy = _first_derivative->get_value(t0, start_y);
 
-    _model_3layer = new pathn(start_y);
+    _model_battery = new pathn(start_y);
 
     y = new vectorn(start_y.length());
     dy = new vectorn(start_dy.length());
@@ -41,7 +47,7 @@ pathn* model_3layer::get_model() {
 
     while (t < _model_1layer->columns() - 1) {
         _integrator_rk4->step(&t, y, dy);
-        _model_3layer->add(*y);
+        _model_battery->add(*y);
     }
 
 
@@ -49,5 +55,5 @@ pathn* model_3layer::get_model() {
     delete dy;
     delete _integrator_rk4;
 
-    return _model_3layer;
+    return _model_battery;
 }

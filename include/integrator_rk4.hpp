@@ -1,5 +1,6 @@
 
 #include "vectorn.hpp"
+#include "config.hpp"
 
 #ifndef PLNR_INTEGRATOR_RK4_H
 #define PLNR_INTEGRATOR_RK4_H
@@ -29,6 +30,9 @@ namespace plnr
         vectorn* dy0;
 
     public:
+
+        integrator_rk4(config* _config, first_derivative* __first_derivative, double _t0, vectorn _y0, vectorn _dy0);
+
         /// @brief Initialize an integrator object with initial conditions
         /// @param __first_derivative   object that represents the first derivative of a desired function
         /// @param _t0                  value of the indipedent variable, i.e. time

@@ -180,6 +180,16 @@ vectorn pathn::avg() {
     return _avg;
 }
 
+vectorn pathn::sum() {
+    vectorn _sum(rows());
+    _sum.inherit_flags(get(0));
+    for (int i = 0; i < rows(); i++) {
+        for (int j = 0; j < columns(); j++)
+            _sum.set(i, _sum.get(i) + get(j).get(i));
+    }
+    return _sum;
+}
+
 pathn* pathn::copy() { return new pathn(*this); }
 
 pathn& pathn::operator=(const pathn& _pathn) {
