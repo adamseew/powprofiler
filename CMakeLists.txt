@@ -11,6 +11,8 @@ set(SOURCES
     src/model_battery.cpp
     src/pathn.cpp
     src/profiler.cpp
+    src/sampler_nano.cpp
+    src/sampler_odroid.cpp
     src/sampler_tx2.cpp
     src/soc_1resistor.cpp
     src/utility.cpp

@@ -46,6 +46,18 @@ int main(int argc, char** argv) {
     _sampler =                              new sampler_tx2();
     _profiler =                             new profiler(_config, _sampler);
 
+    // ***
+    // *** used to find mem leak
+    // *** _model_1layer = new pathn("/home/user/pplanner/profiles/matrix-sleep/matrix-sleep_2048-8_1layer.csv");
+    // *** _first_derivative = new soc_1resistor(*_model_1layer / 12.0, 14.8, 0.0012, 12, 5);
+    // *** _model_battery = model_battery(_config, _model_1layer, _first_derivative).get_model();
+    // *** delete _model_1layer;
+    // *** _model_battery->get(_model_battery->columns() - 1).get(vectorn_flags::power);
+    // *** _model_battery->save(string(argv[2]) + "_" + to_string(i) + "-" + to_string(j) + "_battery.csv");
+    // *** delete _model_battery;
+    // *** delete _first_derivative;
+    // ***
+    
     // first parameter is the sample to profile
     // second parameter is the name of the sample, i.e., matrix-multiplication
 
@@ -115,8 +127,8 @@ int main(int argc, char** argv) {
         system(("../splot.sh " + string(argv[2]) + " " + string(argv[2]) + "_1layer_.csv " + string(argv[2]) + "_battery.csv").c_str());
     }
 
-    delete _sampler;
     delete _profiler;
+    delete _config;
 
     exit(0);
 }

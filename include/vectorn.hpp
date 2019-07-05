@@ -6,7 +6,7 @@
 
 namespace plnr
 {
-    enum class vectorn_flags { 
+    enum struct vectorn_flags { 
         unflagged = 0, 
 
         power =     100,
@@ -21,6 +21,8 @@ namespace plnr
         int                                     _length;
         std::vector<double>                     _vector;
         std::vector<std::vector<vectorn_flags>> _flags;
+
+        void _vectorn(int __length, double* values, std::vector<std::vector<vectorn_flags>> __flags);
 
     public:
         vectorn(int __length, double* values, std::vector<std::vector<vectorn_flags>> __flags);

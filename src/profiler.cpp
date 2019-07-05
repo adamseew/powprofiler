@@ -24,9 +24,7 @@ profiler::profiler(int _frequency, sampler* __sampler) {
     _sampler = __sampler;
 }
 
-profiler::~profiler() { 
-    delete _sampler;
-}
+profiler::~profiler() { }
 
 pathn profiler::profile(string component, int _milliseconds) {
     

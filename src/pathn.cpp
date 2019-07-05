@@ -59,6 +59,10 @@ pathn::pathn(const string& file) {
             _flags->push_back(static_cast<vectorn_flags>(stoi(flag)));
 
         flags.push_back(*_flags);
+
+        vector<vectorn_flags>().swap(*_flags);
+        delete _flags;
+
         ++_length;
     }
 
@@ -77,12 +81,11 @@ pathn::pathn(const string& file) {
             throw logic_error("bad format, at row=" + to_string(row_length) + " column length expected=" + to_string(_length) + " but parsed=" + to_string(__length));
 
         add(*point);
+        delete point;
     }
 
     input_csv.close();
 
-    delete _flags;
-    delete point;
     delete negative;
 
     return;

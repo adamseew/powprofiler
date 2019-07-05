@@ -25,6 +25,7 @@ config::config(const string& _file) {
 
 config::~config() { 
     vector<struct component>().swap(settings);
+    vector< vector<string> >().swap(configurations);
 }
 
 double config::get_frequency() {

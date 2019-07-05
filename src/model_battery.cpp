@@ -15,10 +15,7 @@ model_battery::model_battery(pathn* __model_1layer, first_derivative* __first_de
     h = _h;
 }
 
-model_battery::~model_battery() {
-    delete _model_1layer;
-    delete _first_derivative;
-}
+model_battery::~model_battery() { }
 
 pathn* model_battery::get_model() {
     double          t =                 1.0,
@@ -33,7 +30,7 @@ pathn* model_battery::get_model() {
     pathn*          _model_battery;
     integrator_rk4* _integrator_rk4;
 
-    start_y = *new vectorn(_model_1layer->rows(), new double[_model_1layer->rows()] {0.0});
+    start_y = vectorn(_model_1layer->rows());
     start_y.inherit_flags(_model_1layer->get(0));
     start_y = start_y + 100.0;
     start_dy = _first_derivative->get_value(t0, start_y);
@@ -49,7 +46,6 @@ pathn* model_battery::get_model() {
         _integrator_rk4->step(&t, y, dy);
         _model_battery->add(*y);
     }
-
 
     delete y;
     delete dy;

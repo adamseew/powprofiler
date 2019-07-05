@@ -10,7 +10,7 @@ using std::vector;
 using std::swap;
 using std::invalid_argument;
 
-vectorn::vectorn(int __length, double* values, vector<vector<vectorn_flags>> __flags) {
+void vectorn::_vectorn(int __length, double* values, vector<vector<vectorn_flags>> __flags) {
     assert(__flags.size() == __length);
     _length = __length;
     for (int i = 0; i < length(); i++) {
@@ -19,18 +19,36 @@ vectorn::vectorn(int __length, double* values, vector<vector<vectorn_flags>> __f
     }
 }
 
-vectorn::vectorn(int __length, double* values) : vectorn::vectorn(__length, values, vector<vector<vectorn_flags>>(__length, vector<vectorn_flags>(1, vectorn_flags::unflagged))) { }
+vectorn::vectorn(int __length, double* values, vector<vector<vectorn_flags>> __flags) {
+    _vectorn(__length, values, __flags);
+}
 
-vectorn::vectorn(int __length, std::vector<std::vector<vectorn_flags>> __flags) : vectorn::vectorn(__length, new double[__length] {0.0}, __flags) { }
+vectorn::vectorn(int __length, double* values) {
+    vector<vector<vectorn_flags>> __flags(__length, vector<vectorn_flags>(1, vectorn_flags::unflagged));
+    _vectorn(__length, values, __flags);
+    vector<vector<vectorn_flags>>().swap(__flags);
+} 
+
+vectorn::vectorn(int __length, std::vector<std::vector<vectorn_flags>> __flags) { 
+    double* values = new double[__length] {0.0};
+    _vectorn(__length, values, __flags);
+    delete [] values;
+}
 
 vectorn::vectorn(double value) : vectorn::vectorn(1, &value) { }
 
-vectorn::vectorn(int __length) : vectorn::vectorn(__length, new double[__length] {0.0}) { }
+vectorn::vectorn(int __length) { 
+    double* values = new double[__length] {0.0};
+    vector<vector<vectorn_flags>> __flags(__length, vector<vectorn_flags>(1, vectorn_flags::unflagged));
+    _vectorn(__length, values, __flags);
+    delete [] values;
+    vector<vector<vectorn_flags>>().swap(__flags);
+}
 
 vectorn::vectorn(const vectorn& _vectorn) {
     _length = _vectorn._length;
-    _vector  = *new vector<double>(_vectorn._vector);
-    _flags = *new vector<vector<vectorn_flags>>(_vectorn._flags);
+    _vector  = vector<double>(_vectorn._vector);
+    _flags = vector<vector<vectorn_flags>>(_vectorn._flags);
 }
 
 vectorn::vectorn() : vectorn::vectorn(1) { }
@@ -157,8 +175,8 @@ vectorn* vectorn::copy() { return new vectorn(*this); }
 
 vectorn& vectorn::operator=(const vectorn& _vectorn) {
     _length = _vectorn._length;
-    _vector  = *new vector<double>(_vectorn._vector);
-    _flags = *new vector<vector<vectorn_flags>>(_vectorn._flags);
+    _vector  = vector<double>(_vectorn._vector);
+    _flags = vector<vector<vectorn_flags>>(_vectorn._flags);
 
     return *this;
 }
@@ -171,7 +189,7 @@ vectorn vectorn::operator+(const vectorn& _vectorn) const {
     vectorn sum(length(), values);
     sum.inherit_flags(_vectorn);
 
-    delete values;
+    free(values);
 
     return sum;
 }
@@ -184,7 +202,7 @@ vectorn vectorn::operator+(const double value) const {
     
     vectorn to_sum(length(), values);
 
-    delete values;
+    free(values);
 
     return to_sum + *this;
 }
@@ -199,7 +217,7 @@ vectorn vectorn::operator*(const double value) const {
     vectorn product(length(), values);
     product.inherit_flags(*this);
 
-    delete values;
+    free(values);
 
     return product;
 }

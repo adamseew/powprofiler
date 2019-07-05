@@ -35,7 +35,7 @@ vector<string> plnr::utility_split(const string& source, char token) {
     return _source;
 }
 
-const std::string& plnr::utility_trim(const string& source) {
+const std::string plnr::utility_trim(const string& source) {
 	auto start = source.begin();
 	while (start != source.end() && std::isspace(*start)) {
 		start++;
@@ -46,5 +46,5 @@ const std::string& plnr::utility_trim(const string& source) {
 		end--;
 	} while (std::distance(start, end) > 0 && std::isspace(*end));
 
-	return *new string(start, end + 1);
+	return string(start, end + 1);
 }

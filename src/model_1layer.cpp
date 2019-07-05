@@ -24,10 +24,7 @@ model_1layer::model_1layer(pathn* __model, profiler* __profiler) {
     _model = __model;
 }
 
-model_1layer::~model_1layer() {
-    delete _model;
-    delete _profiler;
-}
+model_1layer::~model_1layer() { }
 
 pathn* model_1layer::get_model() {
 
