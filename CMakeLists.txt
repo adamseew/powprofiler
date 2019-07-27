@@ -1,7 +1,7 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-project (pplanner)
+project (powprofiler)
 
 set(SOURCES
     program.cpp
@@ -21,9 +21,9 @@ set(SOURCES
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++11 -pthread" CACHE STRING "Set C++ Compiler Flags" FORCE)
 
-add_executable(pplanner ${SOURCES})
+add_executable(powprofiler ${SOURCES})
 
-target_include_directories(pplanner
+target_include_directories(powprofiler
     PRIVATE
         ${PROJECT_SOURCE_DIR}/include
 )
