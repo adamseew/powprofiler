@@ -38,11 +38,12 @@ int main(int argc, char** argv) {
                         output_csv2,
                         output_csv3;
 
-    config*             _config =           new config("/home/user/pplanner/config2.cfg");
+    config*             _config =           new config("/home/user/pplanner/config.cfg");
     sampler*            _sampler;
     profiler*           _profiler;
 
     _config->load();
+    _config->configure();
     _sampler =                              new sampler_tx2();
     _profiler =                             new profiler(_config, _sampler);
 

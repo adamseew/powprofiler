@@ -7,32 +7,42 @@
 
 namespace plnr
 {
+
+    struct component {
+        std::string                             name;
+        int                                     size;
+        std::vector<std::string>                configurations;
+    };
+
+
     class config {
     
     private:
-        struct component {
-        std::string                             name,
+        struct _component {
+            std::string                         name,
                                                 src;
-        std::vector<std::string>                fixed_arguments;
-        std::vector<int>                        range_arguments;    
-        std::vector<std::pair<int, int> >       positions;      };
+            int                                 size;
+            std::vector<std::string>            fixed_arguments;
+            std::vector<int>                    range_arguments;    
+            std::vector<std::pair<int, int> >   positions;};
 
+        std::vector<struct _component>          _settings;
         std::vector<struct component>           settings;
-        std::vector<std::vector<std::string> >  configurations;
+
 
         std::string                             file,
                                                 directory;
         int                                     frequency;
         double                                  h;
+        bool                                    configured;
 
         void read_format_line(std::ifstream& file, std::string &line, int &line_number);
         bool trim_compare(const std::string& _left, const std::string& _right);
         bool file_exists(const std::string& name);
-        void nested_combinations(struct component _component, std::string result_nested, std::vector<std::string>& combinations, int i, int shift, int last);
+        void nested_combinations(struct _component _component, std::string result_nested, std::vector<std::string>& combinations, int i, int shift, int last);
         void nested_configurations(std::vector<std::vector<std::string> > __configurations, std::vector<std::vector<std::string> >& _configurations, std::vector<std::string> result_nested, int i, int l);
 
     public:
-
         config(const std::string& _file);
 
         ~config();
@@ -44,6 +54,8 @@ namespace plnr
         void load();
 
         void configure();
+
+        std::vector<struct component>::iterator components();
     };
 }
 
