@@ -8,6 +8,7 @@ set(SOURCES
     src/config.cpp
     src/integrator_rk4.cpp
     src/model_1layer.cpp
+    src/model_2layer.cpp
     src/model_battery.cpp
     src/pathn.cpp
     src/profiler.cpp
