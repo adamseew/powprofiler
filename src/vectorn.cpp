@@ -29,7 +29,7 @@ vectorn::vectorn(int __length, double* values) {
     vector<vector<vectorn_flags>>().swap(__flags);
 } 
 
-vectorn::vectorn(int __length, std::vector<std::vector<vectorn_flags>> __flags) { 
+vectorn::vectorn(int __length, vector<vector<vectorn_flags>> __flags) { 
     double* values = new double[__length] {0.0};
     _vectorn(__length, values, __flags);
     delete [] values;
@@ -86,6 +86,10 @@ const int vectorn::get_index(vectorn_flags flag) const {
 vector<vectorn_flags> vectorn::get_flag(int index) {
     assert(index >= 0 && index < length());
     return _flags.at(index);
+}
+
+vector<vector<vectorn_flags> > vectorn::get_flags() {
+    return _flags;
 }
 
 void vectorn::set(int index, double value) {

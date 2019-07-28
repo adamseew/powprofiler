@@ -28,7 +28,7 @@ namespace plnr
 
         model_1layer(std::string _component, std::string _arguments, profiler* __profiler);
 
-        model_1layer(pathn* __model, profiler* _profiler);
+        model_1layer(pathn* __model, profiler* __profiler);
 
         ~model_1layer();
 

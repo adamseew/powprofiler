@@ -21,6 +21,7 @@ config::config(const string& _file) {
     h = 0.01;
     directory = "profiles";
     file = _file;
+    loaded = false;
     configured = false;
 }
 
@@ -37,10 +38,6 @@ double config::get_h() {
 }
 
 void config::load() {
-    if (!file_exists(file))
-        throw logic_error("configuration file " + file + " does not exist");
-
-    std::ifstream       input_cfg(file);
 
     int                 i,
                         line_number =       0,
@@ -54,6 +51,14 @@ void config::load() {
     vector<string>      property_value;
 
     struct _component    __component;
+
+    if (loaded)
+        return;
+
+    if (!file_exists(file))
+        throw logic_error("configuration file " + file + " does not exist");
+
+    std::ifstream       input_cfg(file);
 
     read_format_line(input_cfg, line, line_number);
 
@@ -233,56 +238,58 @@ void config::load() {
         throw logic_error("configuration file error line " + to_string(line_number) + ". At least one component expected");
 
     input_cfg.close();
-
+    loaded = true;
 }
 
 void config::configure() {
-    if (!configured) {
-        int                 i;
 
-        struct component    _component;
+    int                 i;
 
-        vector<string>      arguments_combinations,
+    struct component    _component;
+
+    vector<string>      arguments_combinations,
                             _configurations;
 
-        for (auto &__component : _settings) {
-            _component.configurations.clear();
-            _component.configurations.push_back(__component.src);
+    if (configured)
+        return;
 
-            for (auto position : __component.positions) {
-                if (position.first == 0)
-                    for (i = 0; i < _component.configurations.size(); i++)
-                        _component.configurations.at(i) += " " + __component.fixed_arguments.at(position.second);
+    for (auto &__component : _settings) {
+        _component.configurations.clear();
+        _component.configurations.push_back(__component.src);
 
-                else {
-                    arguments_combinations.clear();
-                    nested_combinations(__component, "", arguments_combinations, __component.range_arguments.at(position.second), position.second, position.first); 
-                    _configurations.clear();
-                    for (i = 0; i < _component.configurations.size(); i++) {
-                        for (auto combination : arguments_combinations)
-                            _configurations.push_back(_component.configurations.at(i) + combination);
-                    }
-                    if (_configurations.size() > _component.configurations.size()) {
-                        _component.configurations.clear();
-                        _component.configurations.insert(_component.configurations.end(), _configurations.begin(), _configurations.end());
-                    }
+        for (auto position : __component.positions) {
+            if (position.first == 0)
+                for (i = 0; i < _component.configurations.size(); i++)
+                    _component.configurations.at(i) += " " + __component.fixed_arguments.at(position.second);
+
+            else {
+                arguments_combinations.clear();
+                nested_combinations(__component, "", arguments_combinations, __component.range_arguments.at(position.second), position.second, position.first); 
+                _configurations.clear();
+                for (i = 0; i < _component.configurations.size(); i++) {
+                    for (auto combination : arguments_combinations)
+                        _configurations.push_back(_component.configurations.at(i) + combination);
+                }
+                if (_configurations.size() > _component.configurations.size()) {
+                    _component.configurations.clear();
+                    _component.configurations.insert(_component.configurations.end(), _configurations.begin(), _configurations.end());
                 }
             }
-
-            _component.name = __component.name;
-            _component.size = __component.size;
-            settings.push_back(_component);
         }
 
-        configured = true;
+        _component.name = __component.name;
+        _component.size = __component.size;
+        settings.push_back(_component);
     }
+
+    configured = true;
 }
 
-vector<struct component>::iterator config::components() {
+vector<struct component> config::components() {
     
     configure();
 
-    return settings.begin();
+    return settings;
 }
 
 void config::nested_combinations(struct _component ___component, string result_nested, vector<string>& combinations, int i, int shift, int last) {

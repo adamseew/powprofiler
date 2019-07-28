@@ -34,7 +34,8 @@ namespace plnr
                                                 directory;
         int                                     frequency;
         double                                  h;
-        bool                                    configured;
+        bool                                    loaded,
+                                                configured;
 
         void read_format_line(std::ifstream& file, std::string &line, int &line_number);
         bool trim_compare(const std::string& _left, const std::string& _right);
@@ -55,7 +56,7 @@ namespace plnr
 
         void configure();
 
-        std::vector<struct component>::iterator components();
+        std::vector<struct component> components();
     };
 }
 

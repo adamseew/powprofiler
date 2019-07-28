@@ -8,10 +8,23 @@ namespace plnr
 {
     enum struct vectorn_flags { 
         unflagged = 0, 
+        
+        energy_gain =   30,
+        soc_gain =      60, // gain says how much a value differs from power (i.e., energy - power = energy_gain)
 
-        power =     100,
-        power_cpu = 101,
-        power_gpu = 102,
+        power =         100,
+        power_cpu =     101,
+        power_gpu =     102,
+
+        energy =        130,
+        energy_cpu =    131,
+        energy_gpu =    132,
+
+        soc =           160,
+        soc_cpu =       161,
+        soc_gpu =       162,
+
+        problem_dimension = 200, // numbers in [200,300) are for problem's dimensions (i.e., for the arguments of a component). Use formulation vectorn_flags::problem_dimension + x s.t. 0 <= x < 100
     };
 
     /// Gives a point in n-dimensional space. The class stores a sequence of real numbers and defines operators enabling to treat such sequences as real vectors
@@ -75,6 +88,8 @@ namespace plnr
         /// @param index    index of which the flag has to be obtained
         /// @return         the set of falgs corresponding to a specific index
         std::vector<vectorn_flags> get_flag(int index);
+
+        std::vector<std::vector<vectorn_flags> > get_flags();
 
         /// @brief Stores a vaue in a specific row in a nx1 vector
         /// @param index    index of the row
