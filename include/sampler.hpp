@@ -12,6 +12,8 @@ namespace plnr
         virtual ~sampler() { }
 
         virtual vectorn get_sample() = 0;
+
+        virtual bool dryrun() = 0;
     };
 }
 

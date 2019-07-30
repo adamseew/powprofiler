@@ -1,5 +1,6 @@
 
 #include "../include/model_battery.hpp"
+#include "../include/soc_1resistor.hpp"
 #include "../include/model_2layer.hpp"
 #include "../include/utility.hpp"
 
@@ -9,15 +10,13 @@ using std::vector;
 using std::pair;
 using std::exception;
 
-model_2layer::model_2layer(config* __config, first_derivative* __first_derivative, profiler* __profiler) {
+model_2layer::model_2layer(config* __config, profiler* __profiler) {
     _config = __config;
-    _first_derivative = __first_derivative;
     _profiler = __profiler;
 }
 
 model_2layer::model_2layer(vector<pair<struct component, pathn*> > __models, profiler* __profiler) {
     _config = NULL;
-    _first_derivative = NULL;
     _profiler = __profiler;
     _models = __models;
 }
@@ -37,6 +36,7 @@ vector<pair<struct component, pathn*> > model_2layer::models() {
 
     vectorn                         energy_1layer,
                                     power_1layer,
+                                    working_copy,
                                     soc;
 
     vectorn*                        merged;
@@ -45,6 +45,8 @@ vector<pair<struct component, pathn*> > model_2layer::models() {
 
     vector<vector<vectorn_flags> >  __flags,
                                     _flags;
+
+    first_derivative*               _first_derivative;
 
     model_battery*                  __model_battery;
 
@@ -76,70 +78,62 @@ vector<pair<struct component, pathn*> > model_2layer::models() {
 
             if (merged == NULL) {
                 
+                // columns for configurations
                 i = 0;
                 for (auto _configuration : utility_split(configuration, ' ')) {
-                    try {
+                    if (utility_is_number(_configuration)) {
 
-                        // todo: so stod should return an exception if the value is not a number; check
-
-                        stod(configuration);
                         ___flags.push_back(static_cast<vectorn_flags>(
-                            static_cast<int>(vectorn_flags::problem_dimension) + i
+                            static_cast<int>(vectorn_flags::problem_dimension) + i++
                         ));
-                        i++;
+                        
                         _flags.push_back(___flags);
                         ___flags.empty();
-                    } catch (exception &_exception) { }
+                    }
                 }
 
-                __flags = power_1layer.get_flags();
-
+                // columns for power
+                working_copy = power_1layer;
+                __flags = working_copy.get_flags();
+                _flags.insert(_flags.end(), __flags.begin(), __flags.end());
+                
+                // columns for energy
+                working_copy.transform_flags(vectorn_flags::gain);
+                __flags = working_copy.get_flags();
                 _flags.insert(_flags.end(), __flags.begin(), __flags.end());
 
-                for (auto &___flags : __flags) {
-                    merged_size += 3;
-                    for (auto &flag : ___flags)
-                        flag = static_cast<vectorn_flags>(
-                            static_cast<int>(flag) + 
-                            static_cast<int>(vectorn_flags::energy_gain));
-                }
-                _flags.insert(_flags.end(), __flags.begin(), __flags.end());
-
-                for (auto &___flags : __flags) {
-                    for (auto &flag : ___flags)
-                        flag = static_cast<vectorn_flags>(
-                            static_cast<int>(flag) -
-                            static_cast<int>(vectorn_flags::energy_gain) +
-                            static_cast<int>(vectorn_flags::soc_gain));
-                }
+                // columns for soc
+                working_copy.transform_flags(vectorn_flags::gain);
+                __flags = working_copy.get_flags();
                 _flags.insert(_flags.end(), __flags.begin(), __flags.end());
 
                 merged = new vectorn(merged_size, _flags);
             }
 
             i = 0;
-            for (auto _configuration : utility_split(configuration, ' ')) {
-                try {
+            for (auto _configuration : utility_split(configuration, ' '))
+                if (utility_is_number(_configuration)) {
                     configuration_value = stod(configuration);
                     merged->set(i, configuration_value);
-                    i++;
-                } catch (exception &_exception) { }
-            }
+                }
 
-            for (j = 0; i < power_1layer.length(); i++)
+            for (j = 0; j < power_1layer.length(); j++)
                 merged->set(i + j, power_1layer.get(i));
 
             energy_1layer = _model_1layer->sum();
 
-            for (j = 0; i < energy_1layer.length(); i++)
+            for (j = 0; j < energy_1layer.length(); j++)
                 merged->set(
                     i + j + power_1layer.length(), 
                     energy_1layer.get(i));
+
+            _first_derivative = new soc_1resistor(*_model_1layer / 12.0, 14.8, 0.0012, 12, 5);
 
             __model_battery = new model_battery(_config, _model_1layer, _first_derivative);
             _model_battery = __model_battery->get_model();
 
             delete _model_1layer;
+            delete _first_derivative;
             delete __model_battery;
 
             soc = _model_battery->get(_model_battery->columns() - 1);

@@ -48,3 +48,9 @@ const std::string plnr::utility_trim(const string& source) {
 
 	return string(start, end + 1);
 }
+
+bool plnr::utility_is_number(const string& source) {
+    return  !source.empty() && std::find_if(source.begin(), source.end(), [](char c) { 
+        return !(std::isdigit(c) || c == '.');  
+    }) == source.end();
+}

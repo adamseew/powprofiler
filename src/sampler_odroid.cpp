@@ -43,3 +43,7 @@ vectorn sampler_odroid::get_sample() {
 
     return power_sample;
 }
+
+bool sampler_odroid::dryrun() {
+    return (file_descriptors[0] * file_descriptors[1] * file_descriptors[2] >= 0);
+}

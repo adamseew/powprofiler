@@ -4,27 +4,33 @@
 #ifndef PLNR_VECTORN_H
 #define PLNR_VECTORN_H
 
+// from and to where is possible to include metrics in the vectorn_flags structure i.e., LOWER_VECTORN_FLAGS_LIMIT <= metric < UPPER_VECTORN_FLAGS_LIMIT
+#define LOWER_VECTORN_FLAGS_LIMIT   100
+#define UPPER_VECTORN_FLAGS_LIMIT   200
+#define VECTORN_FLAGS_GAIN                30
+#define VECTORN_FLAGS_LOSS                -30
+
 namespace plnr
 {
     enum struct vectorn_flags { 
         unflagged = 0, 
         
-        energy_gain =   30,
-        soc_gain =      60, // gain says how much a value differs from power (i.e., energy - power = energy_gain)
+        gain =          VECTORN_FLAGS_GAIN,
+        loss =          VECTORN_FLAGS_LOSS, // gain says how much a value differs from power (i.e., energy - power = gain). It's for purely implementation details
 
-        power =         100,
-        power_cpu =     101,
-        power_gpu =     102,
+        power =         LOWER_VECTORN_FLAGS_LIMIT,
+        power_cpu =     LOWER_VECTORN_FLAGS_LIMIT + 1,
+        power_gpu =     LOWER_VECTORN_FLAGS_LIMIT + 2,
 
-        energy =        130,
-        energy_cpu =    131,
-        energy_gpu =    132,
+        energy =        LOWER_VECTORN_FLAGS_LIMIT + VECTORN_FLAGS_GAIN,
+        energy_cpu =    LOWER_VECTORN_FLAGS_LIMIT + VECTORN_FLAGS_GAIN + 1,
+        energy_gpu =    LOWER_VECTORN_FLAGS_LIMIT + VECTORN_FLAGS_GAIN + 2,
 
-        soc =           160,
-        soc_cpu =       161,
-        soc_gpu =       162,
+        soc =           LOWER_VECTORN_FLAGS_LIMIT + 2*VECTORN_FLAGS_GAIN,
+        soc_cpu =       LOWER_VECTORN_FLAGS_LIMIT + 2*VECTORN_FLAGS_GAIN + 1,
+        soc_gpu =       LOWER_VECTORN_FLAGS_LIMIT + 2*VECTORN_FLAGS_GAIN + 2,
 
-        problem_dimension = 200, // numbers in [200,300) are for problem's dimensions (i.e., for the arguments of a component). Use formulation vectorn_flags::problem_dimension + x s.t. 0 <= x < 100
+        problem_dimension = UPPER_VECTORN_FLAGS_LIMIT, // numbers in [200,300) are for problem's dimensions (i.e., for the arguments of a component). Use formulation vectorn_flags::problem_dimension + x s.t. 0 <= x < 100
     };
 
     /// Gives a point in n-dimensional space. The class stores a sequence of real numbers and defines operators enabling to treat such sequences as real vectors
@@ -133,6 +139,10 @@ namespace plnr
         /// @param _vectorn the object which flags have to be inherited by the current instance
         /// @return         the current instance this
         vectorn* inherit_flags(vectorn _vectorn);
+
+        void empty_flags();
+
+        void transform_flags(vectorn_flags flag);
 
         /// @brief Gives the Euclidean norm of the vector
         /// @return the value of the Euclidean norm

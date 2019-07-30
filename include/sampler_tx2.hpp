@@ -20,6 +20,8 @@ namespace plnr
         ~sampler_tx2();
 
         virtual vectorn get_sample();
+
+        virtual bool dryrun();
     };
 }
 

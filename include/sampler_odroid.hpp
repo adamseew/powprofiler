@@ -20,6 +20,8 @@ namespace plnr
         ~sampler_odroid();
 
         virtual vectorn get_sample();
+
+        virtual bool dryrun();
     };
 }
 

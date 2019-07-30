@@ -112,7 +112,8 @@ void vectorn::set_flag(int index, vectorn_flags flag) {
     vector<vectorn_flags> __flags;
     __flags.push_back(flag);
 
-    set_flag(index, __flags);
+    if (!has_flag(index, flag))
+        set_flag(index, __flags);
 }
 
 void vectorn::set_flag(int index, vector<vectorn_flags> __flags) {
@@ -166,6 +167,31 @@ vectorn* vectorn::inherit_flags(vectorn _vectorn) {
     }
 
     return this;
+}
+
+
+void vectorn::empty_flags() {
+    int     i = 0;
+    
+    for (auto &__flags : _flags) {
+        __flags.empty();
+        set_flag(i++, vectorn_flags::unflagged);
+    }
+}
+
+void vectorn::transform_flags(vectorn_flags flag) {
+    int     __flag = 0;
+
+    for (auto &__flags : _flags) {
+        for (auto &_flag : __flags) {
+            
+            __flag = static_cast<int>(_flag) + static_cast<int>(flag);
+
+            if (__flag >= LOWER_VECTORN_FLAGS_LIMIT && __flag < UPPER_VECTORN_FLAGS_LIMIT) 
+                _flag = static_cast<vectorn_flags>(__flag);
+        }
+            
+    }
 }
 
 double vectorn::abs() {

@@ -1,9 +1,11 @@
 
 #include "include/integrator_rk4.hpp"
+#include "include/sampler_odroid.hpp"
 #include "include/soc_1resistor.hpp"
 #include "include/model_battery.hpp"
 #include "include/model_1layer.hpp"
 #include "include/model_2layer.hpp"
+#include "include/sampler_nano.hpp"
 #include "include/sampler_tx2.hpp"
 #include "include/profiler.hpp"
 
@@ -14,6 +16,8 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
+using std::runtime_error;
+
 using namespace plnr;
 using namespace std;
 
@@ -23,10 +27,6 @@ int main(int argc, char** argv) {
 
     setpriority(PRIO_PROCESS, getpid(), -20);
 
-    pathn*              _model_1layer;
-
-    first_derivative*   _first_derivative;
-
     config*             _config;
     sampler*            _sampler;
     profiler*           _profiler;
@@ -35,12 +35,25 @@ int main(int argc, char** argv) {
 
     _config->load();
     _config->configure();
-    _sampler =                              new sampler_tx2();
-    _profiler =                             new profiler(_config, _sampler);
 
-    // todo: this (_first_derivative) must be integrated into model_2layer, it uses model_1layer
+    _sampler = new sampler_tx2();
+    if (!_sampler->dryrun()) {
+        delete _sampler;
 
-    _first_derivative = new soc_1resistor(*_model_1layer / 12.0, 14.8, 0.0012, 12, 5);
+        _sampler = new sampler_odroid();
+        if (!_sampler->dryrun()) {
+            delete _sampler;
+
+            _sampler = new sampler_nano();
+            if (!_sampler->dryrun()) {
+                delete _sampler;
+
+                throw runtime_error("unsupported architecture");
+            }
+        }
+    }
+
+    _profiler = new profiler(_config, _sampler);
 
     if (argc >= 2) {
 
@@ -51,16 +64,23 @@ int main(int argc, char** argv) {
         _sampler = new sampler_tx2();
         _profiler = new profiler(_config, _sampler);
 
-        _model_2layer = new model_2layer(_config, _first_derivative, _profiler);
-        _model_2layer->models();
+        _model_2layer = new model_2layer(_config, _profiler);
 
-        // todo: well ... that
-        // _model_2layer->save();
+        for (auto model : _model_2layer->models()) {
+            model.second->save(model.first.name + ".csv");
+            if (model.first.size < 3) {
+                // todo: plot a 2D plot with gnuplot here
+            } else if (model.first.size < 4) {
+                // todo: plot a 3D plot with gnuplot here
+            }
+        }
 
-        system(("../splot.sh " + string(argv[2]) + " " + string(argv[2]) + "_1layer_.csv " + string(argv[2]) + "_battery.csv").c_str());
+        // system(("../splot.sh " + string(argv[2]) + " " + string(argv[2]) + "_1layer_.csv " + string(argv[2]) + "_battery.csv").c_str());
     }
 
+    delete _model_2layer;
     delete _profiler;
+    delete _sampler;
     delete _config;
 
     exit(0);

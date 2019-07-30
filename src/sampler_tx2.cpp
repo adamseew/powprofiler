@@ -43,3 +43,7 @@ vectorn sampler_tx2::get_sample() {
 
     return power_sample;
 }
+
+bool sampler_tx2::dryrun() {
+    return (file_descriptors[0] * file_descriptors[1] * file_descriptors[2] >= 0);
+}
