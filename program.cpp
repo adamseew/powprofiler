@@ -27,14 +27,6 @@ int main(int argc, char** argv) {
 
     setpriority(PRIO_PROCESS, getpid(), -20);
 
-    // here
-
-    // pathn* _model_1layer = new pathn("/home/user/Dropbox/acad/papers/ijpp-hlpgpu-special-issue/figures/source/matrix-gpu/matrix-exponentiation_layer2-power.csv");
-    // _model_1layer->approximate(4);
-    // _model_1layer->save("/home/user/Dropbox/acad/papers/ijpp-hlpgpu-special-issue/figures/source/matrix-gpu/matrix-exponentiation_layer2-power_approx.csv");
-
-    // here
-
     config*             _config;
     sampler*            _sampler;
     profiler*           _profiler;
@@ -64,14 +56,19 @@ int main(int argc, char** argv) {
 
         _config->load();
         _config->configure();
+        
         _sampler = new sampler_tx2();
         _profiler = new profiler(_config, _sampler);
 
         _model_2layer = new model_2layer(_config, _profiler);
 
         for (auto model : _model_2layer->models()) {
+
+            // use following for approximation method
+            // model.second->approximate(degree);
+
             model.second->save(model.first.name + ".csv");
-            if (model.first.size < 3) {
+            if (model.first.size < 3) {                
                 // todo: plot a 2D plot with gnuplot here
             } else if (model.first.size < 4) {
                 // todo: plot a 3D plot with gnuplot here
