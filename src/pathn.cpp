@@ -162,6 +162,30 @@ void pathn::add(vectorn point) {
     path.push_back(point); 
 }
 
+void pathn::approximate() {
+    approximate(1);
+}
+
+void pathn::approximate(int degree) {
+    assert(degree >= 1);
+
+    if (degree != 1)
+        approximate(degree - 1);
+
+    int         i;
+
+    vector<vectorn> new_path;
+
+    for (i = 1; i < columns(); i++) {
+        new_path.push_back(path.at(i - 1));
+        new_path.push_back((path.at(i - 1) + path.at(i)) / 2);
+    }
+    new_path.push_back(path.at(i - 1));
+
+    vector<vectorn>().swap(path);
+    path = new_path;
+}
+
 vectorn pathn::abs() {
     vectorn _abs(rows());
     for (int i = 0; i < rows(); i++) {

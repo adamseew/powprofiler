@@ -29,8 +29,9 @@ vector<pair<struct component, pathn*> > model_2layer::models() {
     
     int                             i,
                                     j,
-                                    merged_size = 0,
-                                    merged_count;
+                                    merged_size = 0;
+
+    bool                            merged_initialized = false;
 
     double                          configuration_value;
 
@@ -76,7 +77,7 @@ vector<pair<struct component, pathn*> > model_2layer::models() {
 
             /// initializing vector that will contain data saved later into model
 
-            if (merged == NULL) {
+            if (!merged_initialized) {
                 
                 // columns for configurations
                 i = 0;
@@ -108,13 +109,15 @@ vector<pair<struct component, pathn*> > model_2layer::models() {
                 _flags.insert(_flags.end(), __flags.begin(), __flags.end());
 
                 merged = new vectorn(merged_size, _flags);
+
+                merged_initialized = true;
             }
 
             i = 0;
             for (auto _configuration : utility_split(configuration, ' '))
                 if (utility_is_number(_configuration)) {
                     configuration_value = stod(configuration);
-                    merged->set(i, configuration_value);
+                    merged->set(i++, configuration_value);
                 }
 
             for (j = 0; j < power_1layer.length(); j++)
@@ -149,6 +152,7 @@ vector<pair<struct component, pathn*> > model_2layer::models() {
         }
 
         delete merged;
+        merged_initialized = true;
 
         _models.push_back(pair<struct component, pathn*>(component, _model));
     }

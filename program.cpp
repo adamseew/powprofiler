@@ -27,14 +27,19 @@ int main(int argc, char** argv) {
 
     setpriority(PRIO_PROCESS, getpid(), -20);
 
+    // here
+
+    // pathn* _model_1layer = new pathn("/home/user/Dropbox/acad/papers/ijpp-hlpgpu-special-issue/figures/source/matrix-gpu/matrix-exponentiation_layer2-power.csv");
+    // _model_1layer->approximate(4);
+    // _model_1layer->save("/home/user/Dropbox/acad/papers/ijpp-hlpgpu-special-issue/figures/source/matrix-gpu/matrix-exponentiation_layer2-power_approx.csv");
+
+    // here
+
     config*             _config;
     sampler*            _sampler;
     profiler*           _profiler;
 
     model_2layer*       _model_2layer;
-
-    _config->load();
-    _config->configure();
 
     _sampler = new sampler_tx2();
     if (!_sampler->dryrun()) {
@@ -53,11 +58,9 @@ int main(int argc, char** argv) {
         }
     }
 
-    _profiler = new profiler(_config, _sampler);
-
     if (argc >= 2) {
 
-        _config = new config(argv[2]);
+        _config = new config(argv[1]);
 
         _config->load();
         _config->configure();

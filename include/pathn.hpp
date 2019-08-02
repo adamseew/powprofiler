@@ -41,6 +41,10 @@ namespace plnr
 
         void add(vectorn point);
 
+        void approximate();
+
+        void approximate(int degree);
+
         vectorn abs();
 
         vectorn avg();
