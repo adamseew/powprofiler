@@ -46,6 +46,10 @@ namespace plnr
     public:
         config(const std::string& _file);
 
+        config(component __component, double _frequency, double _h);
+
+        config(double _frequency, double _h);
+
         ~config();
 
         double get_frequency();
@@ -57,6 +61,11 @@ namespace plnr
         void configure();
 
         std::vector<struct component> components();
+
+        void add_component(component __component);
+
+        template<typename... params>
+        void add_configuration(component __component, params... _params);
     };
 }
 

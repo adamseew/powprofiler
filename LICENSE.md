@@ -1,4 +1,6 @@
 
+The MIT License
+
 Copyright (c) 2019 Adam Seewald, SDU UAS Center
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

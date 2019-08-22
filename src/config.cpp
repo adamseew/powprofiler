@@ -3,6 +3,7 @@
 #include "../include/config.hpp"
 
 #include <sys/stat.h>
+#include <cstdarg>
 #include <fstream>
 #include <cmath> 
 
@@ -17,12 +18,34 @@ using std::string;
 using std::pair;
 
 config::config(const string& _file) {
+
+    /// calling powprof by passing a configuration file, this mean that user have to call load to load data from file, and configure later to generate all the configurations from file
+
     frequency = 10;
     h = 0.01;
-    directory = "profiles";
+    
     file = _file;
     loaded = false;
     configured = false;
+}
+
+/// following two constructors are used when powprof is compiled and used as a library, thus configurations run as they are added
+
+config::config(component __component, double _frequency, double _h) {
+    frequency = _frequency;
+    h = _h;
+    settings.push_back(__component);
+
+    loaded = true;
+    configured = true;
+}
+
+config::config(double _frequency, double _h) {
+    frequency = _frequency;
+    h = _h;
+    
+    loaded = true;
+    configured = true;
 }
 
 config::~config() { 
@@ -287,9 +310,48 @@ void config::configure() {
 
 vector<struct component> config::components() {
     
+    load();
     configure();
 
     return settings;
+}
+
+void config::add_component(component __component) {
+
+    for (auto ___component : settings)
+        if (___component.name == __component.name)
+            throw new logic_error("component " + __component.name + " bad name. Multiple components within different configurations cannot have same name");
+    
+    settings.push_back(__component);
+}
+
+template<typename... params>
+void config::add_configuration(component __component, params... parameters) {
+
+    int                 expected_size;
+
+    string              configuration;
+
+    const std::size_t   parameters_count =  sizeof...(string); 
+
+    for (auto &___component : settings)
+        if (__component.name == ___component.name) {
+            if (!___component.configurations.empty()) {
+                expected_size = utility_split(__component.configurations.at(0), ' ').size() - 1;
+
+                if (parameters_count != expected_size)
+                    throw new logic_error("component " + __component.name + " bad configuration size. Expected " + to_string(expected_size) + " but found " + to_string(parameters_count));
+            }
+            
+            ___component.size++;
+
+            configuration = "";
+
+            for (auto _configuration : parameters)
+                configuration += " " to_string(_configuration);
+                
+            ___component.configurations.push_back(to_string(configuration.erase(0)));
+        }
 }
 
 void config::nested_combinations(struct _component ___component, string result_nested, vector<string>& combinations, int i, int shift, int last) {
