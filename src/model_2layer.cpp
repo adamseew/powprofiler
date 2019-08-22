@@ -28,8 +28,7 @@ model_2layer::~model_2layer() {
 vector<pair<struct component, pathn*> > model_2layer::models() {
     
     int                             i,
-                                    j,
-                                    merged_size = 0;
+                                    j;
 
     bool                            merged_initialized = false;
 
@@ -89,7 +88,7 @@ vector<pair<struct component, pathn*> > model_2layer::models() {
                         ));
                         
                         _flags.push_back(___flags);
-                        ___flags.empty();
+                        ___flags.clear();
                     }
                 }
 
@@ -108,7 +107,7 @@ vector<pair<struct component, pathn*> > model_2layer::models() {
                 __flags = working_copy.get_flags();
                 _flags.insert(_flags.end(), __flags.begin(), __flags.end());
 
-                merged = new vectorn(merged_size, _flags);
+                merged = new vectorn(_flags.size(), _flags);
 
                 merged_initialized = true;
             }
@@ -116,19 +115,19 @@ vector<pair<struct component, pathn*> > model_2layer::models() {
             i = 0;
             for (auto _configuration : utility_split(configuration, ' '))
                 if (utility_is_number(_configuration)) {
-                    configuration_value = stod(configuration);
+                    configuration_value = stod(_configuration);
                     merged->set(i++, configuration_value);
                 }
 
             for (j = 0; j < power_1layer.length(); j++)
-                merged->set(i + j, power_1layer.get(i));
+                merged->set(i + j, power_1layer.get(j));
 
             energy_1layer = _model_1layer->sum();
 
             for (j = 0; j < energy_1layer.length(); j++)
                 merged->set(
                     i + j + power_1layer.length(), 
-                    energy_1layer.get(i));
+                    energy_1layer.get(j));
 
             _first_derivative = new soc_1resistor(*_model_1layer / 12.0, 14.8, 0.0012, 12, 5);
 
@@ -141,10 +140,10 @@ vector<pair<struct component, pathn*> > model_2layer::models() {
 
             soc = _model_battery->get(_model_battery->columns() - 1);
 
-            for (j = 0; i < soc.length(); i++)
+            for (j = 0; j < soc.length(); j++)
                 merged->set(
-                    i + j + power_1layer.length() + energy_1layer.length(), 
-                    soc.get(i));
+                    i + j + power_1layer.length() + energy_1layer.length(),
+                    soc.get(j));
                 
             delete _model_battery;
 
@@ -152,7 +151,7 @@ vector<pair<struct component, pathn*> > model_2layer::models() {
         }
 
         delete merged;
-        merged_initialized = true;
+        merged_initialized = false;
 
         _models.push_back(pair<struct component, pathn*>(component, _model));
     }
