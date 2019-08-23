@@ -18,9 +18,14 @@ namespace plnr
     class model_1layer : public model {
 
     private:
+        bool            started,
+                        stopped;
+
         std::string     component;
         std::string     arguments;
+
         profiler*       _profiler;
+
         pathn*          _model;
 
     public:
@@ -28,11 +33,15 @@ namespace plnr
 
         model_1layer(std::string _component, std::string _arguments, profiler* __profiler);
 
-        model_1layer(pathn* __model, profiler* __profiler);
+        model_1layer(pathn* __model);
 
         ~model_1layer();
 
         virtual pathn* get_model();
+
+        void start();
+
+        void stop();
     };
 }
 

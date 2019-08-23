@@ -17,17 +17,22 @@ using std::numeric_limits;
 profiler::profiler(config* _config, sampler* __sampler) {
     frequency = _config->get_frequency();
     _sampler = __sampler;
+    _profile = nullptr;
 }
 
 profiler::profiler(int _frequency, sampler* __sampler) {
     frequency = _frequency;
     _sampler = __sampler;
+    _profile = nullptr;
 }
 
 profiler::~profiler() { }
 
-pathn profiler::profile(string component, int _milliseconds) {
-    
+pathn* profiler::profile(const string& component, int _milliseconds) {
+
+    if (_profile)
+        return _profile;
+
     double          timespan =          1000 / frequency,
                     sampled_timespan =  0,
                     sampled_frequency = numeric_limits<double>::max(),
@@ -39,7 +44,7 @@ pathn profiler::profile(string component, int _milliseconds) {
                     needed_samples =    _milliseconds > 0 ?
                                         _milliseconds / timespan :
                                         numeric_limits<int>::max();
-    pathn           _profile;
+    
     vectorn         sample(_sampler->get_sample());
 
     milliseconds    last_result;
@@ -65,8 +70,8 @@ pathn profiler::profile(string component, int _milliseconds) {
                 avg_frequency += _sampled_frequency;
                 last_result = _last_result;
 
-                _profile.add(sample / _samples_count);
-                sample = *(new vectorn(_sampler->get_sample()));
+                _profile->add(sample / _samples_count);
+                sample = vectorn(_sampler->get_sample());
 
                 _samples_count = 1;
                 ++samples_count;
@@ -77,8 +82,15 @@ pathn profiler::profile(string component, int _milliseconds) {
         }
     }),
 
-                    benchmark_thread([&](){
-        system(component.c_str());
+    benchmark_thread([&](){
+        if (!component.empty())
+            system(component.c_str());
+        else
+            
+            // this is the "library version execution"
+
+            started_mutex.lock();
+
     });
     
     if (_milliseconds > 0) {
@@ -110,6 +122,20 @@ pathn profiler::profile(string component, int _milliseconds) {
     return _profile;
 }
 
-pathn profiler::profile(string component) {
+pathn* profiler::profile(const string& component) {
     return profiler::profile(component, 0);
+}
+
+pathn* profiler::profile() {
+    if (!started) {
+
+        started = true;
+        profiler::profile("", 0);
+    } else {
+
+        started_mutex.unlock();
+        started = false;
+    }
+
+    return _profile;
 }

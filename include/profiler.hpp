@@ -1,4 +1,6 @@
 
+#include <mutex>
+
 #include "pathn.hpp"
 #include "sampler.hpp"
 #include "config.hpp"
@@ -11,8 +13,15 @@ namespace plnr
     class profiler {
     
     private:
+        bool        started = false;
+
         int         frequency;
+
         sampler*    _sampler;
+
+        pathn*      _profile;
+
+        std::mutex  started_mutex;
 
     public:
         profiler(config* _config, sampler* __sampler);
@@ -21,9 +30,11 @@ namespace plnr
         
         ~profiler();
 
-        pathn profile(std::string component, int milliseconds);
+        pathn* profile(const std::string& component, int milliseconds);
 
-        pathn profile(std::string component);
+        pathn* profile(const std::string& component);
+
+        pathn* profile();
     };
 }
 
