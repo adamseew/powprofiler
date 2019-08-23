@@ -3,12 +3,14 @@
 #include "../include/config.hpp"
 
 #include <sys/stat.h>
+#include <algorithm>
 #include <cstdarg>
 #include <fstream>
 #include <cmath> 
 
 using namespace plnr;
 
+using std::invalid_argument;
 using std::runtime_error;
 using std::logic_error;
 using std::to_string;
@@ -27,6 +29,7 @@ config::config(const string& _file) {
     file = _file;
     loaded = false;
     configured = false;
+    ordered = true;
 }
 
 /// following two constructors are used when powprof is compiled and used as a library, thus configurations run as they are added
@@ -38,6 +41,7 @@ config::config(component __component, double _frequency, double _h) {
 
     loaded = true;
     configured = true;
+    ordered = false;
 }
 
 config::config(double _frequency, double _h) {
@@ -46,10 +50,12 @@ config::config(double _frequency, double _h) {
     
     loaded = true;
     configured = true;
+    ordered = false;
 }
 
 config::~config() { 
     vector<struct _component>().swap(_settings);
+    vector<struct component>().swap(settings);
 }
 
 double config::get_frequency() {
@@ -271,7 +277,7 @@ void config::configure() {
     struct component    _component;
 
     vector<string>      arguments_combinations,
-                            _configurations;
+                        _configurations;
 
     if (configured)
         return;
@@ -302,10 +308,38 @@ void config::configure() {
 
         _component.name = __component.name;
         _component.size = __component.size;
+
+        for (i = 1; i <= _component.configurations.size(); i++)
+            _component.order.emplace_back(i, i);
+
         settings.push_back(_component);
     }
 
     configured = true;
+}
+
+void config::order() {
+
+    int             i;
+    vector<string>  ordered_configurations;
+
+    if (ordered)
+        return;
+
+    for (auto &__component : settings) {
+        ordered_configurations.swap(__component.configurations);
+
+        std::sort(ordered_configurations.begin(), ordered_configurations.end());
+
+        for (i = 0; i < __component.configurations.size(); i++) {
+            //__component.order.at(i).second
+        } 
+
+        //__component
+    }
+
+
+    //ordered = true;
 }
 
 vector<struct component> config::components() {
@@ -325,33 +359,71 @@ void config::add_component(component __component) {
     settings.push_back(__component);
 }
 
-template<typename... params>
-void config::add_configuration(component __component, params... parameters) {
+struct component config::get_component(string name) {
+    for (auto _component : settings)
+        if (_component.name == name)
+            return _component;
+    
+    throw invalid_argument("No component with name " + name + " found");
+}
 
-    int                 expected_size;
+int config::get_size(string name) {
+    for (auto _component : settings)
+        if (_component.name == name)
+            return _component.size;
+    
+    throw invalid_argument("No component with name " + name + " found");
+}
+
+template<typename... params>
+int config::add_configuration(component __component, const params&... _params) {
+
+    int                 i,
+                        expected_size;
 
     string              configuration;
 
-    const std::size_t   parameters_count =  sizeof...(string); 
+    std::vector<string> __params = {_params...};
 
     for (auto &___component : settings)
         if (__component.name == ___component.name) {
             if (!___component.configurations.empty()) {
                 expected_size = utility_split(__component.configurations.at(0), ' ').size() - 1;
 
-                if (parameters_count != expected_size)
-                    throw new logic_error("component " + __component.name + " bad configuration size. Expected " + to_string(expected_size) + " but found " + to_string(parameters_count));
+                if (__params.size() != expected_size)
+                    throw new logic_error("component " + __component.name + " bad configuration size. Expected " + to_string(expected_size) + " but found " + to_string(__params.size()));
             }
             
             ___component.size++;
 
             configuration = "";
 
-            for (auto _configuration : parameters)
-                configuration += " " to_string(_configuration);
+            for (auto _param : __params) {
                 
-            ___component.configurations.push_back(to_string(configuration.erase(0)));
+                // so any only since cpp 17 ... no strong typization though
+
+                //if (__params.at(i).get_type() != any::string)
+                //    throw new invalid_argument(
+                //        "bad argument (index " + to_string(i) + "). Expected string but found " + __params.at(i).name()
+                //    );
+
+                configuration += " " + _param;
+            }
+
+            configuration = configuration.erase(0);
+
+            for (auto _configuration : ___component.configurations)
+                if (_configuration = configuration)
+                    throw new invalid_argument("configration " + configuration + " is duplicated.");
+                
+            ___component.configurations.push_back(configuration.erase(0));
+            ___component.order.emplace_back(___component.size(), -1);
+
+            return ___component.size();
         }
+    
+    settings.push_back(__component);
+    return add_configuration(__component, _params...);
 }
 
 void config::nested_combinations(struct _component ___component, string result_nested, vector<string>& combinations, int i, int shift, int last) {

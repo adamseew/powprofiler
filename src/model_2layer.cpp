@@ -4,28 +4,70 @@
 #include "../include/model_2layer.hpp"
 #include "../include/utility.hpp"
 
+#include <stdexcept>
+
 using namespace plnr;
 
-using std::vector;
-using std::pair;
+using std::invalid_argument;
+using std::make_tuple;
 using std::exception;
+using std::to_string;
+using std::string;
+using std::vector;
+using std::tuple;
+using std::pair;
+using std::get;
 
 model_2layer::model_2layer(config* __config, profiler* __profiler) {
     _config = __config;
     _profiler = __profiler;
 }
 
-model_2layer::model_2layer(vector<pair<struct component, pathn*> > __models, profiler* __profiler) {
+model_2layer::model_2layer(config* __config) {
+    _config = __config;
+    _profiler = nullptr;
+}
+
+template <typename... params>
+model_2layer::model_2layer(const params&... _params) {
+
+    vector<pair<string, pathn*> >    __params = {_params...};
+
+    for (auto _param : __params) {
+
+        // so any only since cpp 17 ... no strong typization though
+        
+        //if (__params.at(i).get_type() != any::pair<struct component, pathn*>)
+        //    throw new invalid_argument(
+        //        "bad argument (index " + to_string(i) + "). Expected pair<struct component, pathn*> but found " + __params.at(i).name()
+        //    );
+        
+        _models.push_back(_param);
+    }
+}
+
+model_2layer::model_2layer(vector<pair<string, pathn*> > ___models) {
     _config = NULL;
-    _profiler = __profiler;
-    _models = __models;
+    _profiler = nullptr;
+    _models = ___models;
 }
 
 model_2layer::~model_2layer() {
-     vector<pair<struct component, pathn*> >().swap(_models);
+     vector<pair<string, pathn*> >().swap(_models);
+     vector<tuple<string, int, pathn*> >().swap(__models);
 }
 
-vector<pair<struct component, pathn*> > model_2layer::models() {
+template <typename... params>
+void model_2layer::add_model(const struct component &_component, const params&... _params) {
+    
+    vector<pair<int, pathn*> >  __params = {_params...};
+
+    for (auto _param : __params) {
+        __models.push_back(make_tuple(_component.name, _param.first, _param.second));
+    }
+}
+
+vector<pair<string, pathn*> > model_2layer::models() {
     
     int                             i,
                                     j;
@@ -59,15 +101,23 @@ vector<pair<struct component, pathn*> > model_2layer::models() {
     if (!_models.empty())
         return _models;
 
-    // todo: to debug, properly
+    if (_profiler) {
+
+    }
 
     for (auto component : _config->components()) {
         
         _model = new pathn();
 
         for (auto configuration : component.configurations) {
-
-            __model_1layer = new model_1layer(configuration, _profiler);
+            
+            if (_profiler)
+                __model_1layer = new model_1layer(configuration, _profiler);
+            else
+            {
+                // todo
+            }
+                            
             _model_1layer = __model_1layer->get_model();
 
             delete __model_1layer;
@@ -153,6 +203,8 @@ vector<pair<struct component, pathn*> > model_2layer::models() {
         delete merged;
         merged_initialized = false;
 
-        _models.push_back(pair<struct component, pathn*>(component, _model));
+        _models.emplace_back(component.name, _model);
     }
+
+    return _models;
 }

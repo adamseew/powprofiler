@@ -12,6 +12,10 @@ namespace plnr
         std::string                             name;
         int                                     size;
         std::vector<std::string>                configurations;
+        
+        // configurations order. The first int is the position inside configurations vector (amd - 1), the second int is the order on how configurations have to be sampled in the second layer model (is -1 if the model 2layer was still not generated, thus configurations are ordered as they arrived)
+
+        std::vector<std::pair<int, int> >       order;
     };
 
 
@@ -35,7 +39,8 @@ namespace plnr
         int                                     frequency;
         double                                  h;
         bool                                    loaded,
-                                                configured;
+                                                configured,
+                                                ordered;
 
         void read_format_line(std::ifstream& file, std::string &line, int &line_number);
         bool trim_compare(const std::string& _left, const std::string& _right);
@@ -60,12 +65,20 @@ namespace plnr
 
         void configure();
 
+        void order();
+
         std::vector<struct component> components();
 
         void add_component(component __component);
 
+        struct component get_component(std::string name);
+
+        int get_size(std::string name);
+
+        // returns configuration id
+
         template<typename... params>
-        void add_configuration(component __component, params... _params);
+        int add_configuration(component __component, const params&... _params);
     };
 }
 

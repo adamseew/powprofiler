@@ -67,12 +67,12 @@ int main(int argc, char** argv) {
             // use following for approximation method
             // model.second->approximate(degree);
 
-            model.second->save(model.first.name + ".csv");
-            if (model.first.size < 3) {                
-                // todo: plot a 2D plot with gnuplot here
-            } else if (model.first.size < 4) {
-                // todo: plot a 3D plot with gnuplot here
-            }
+            model.second->save(model.first + ".csv");
+            
+            if (_config->get_size(model.first) < 3) { } 
+            
+            else if (_config->get_size(model.first) < 4) { }
+
         }
 
         // system(("../splot.sh " + string(argv[2]) + " " + string(argv[2]) + "_1layer_.csv " + string(argv[2]) + "_battery.csv").c_str());
