@@ -4,6 +4,7 @@
 #include "../include/model_2layer.hpp"
 #include "../include/utility.hpp"
 
+#include <functional>
 #include <stdexcept>
 
 using namespace plnr;
@@ -46,24 +47,33 @@ model_2layer::model_2layer(const params&... _params) {
     }
 }
 
-model_2layer::model_2layer(vector<pair<string, pathn*> > ___models) {
+model_2layer::model_2layer(vector<pair<string, pathn*> > __models) {
     _config = NULL;
     _profiler = nullptr;
-    _models = ___models;
+    _models = __models;
 }
 
 model_2layer::~model_2layer() {
      vector<pair<string, pathn*> >().swap(_models);
-     vector<tuple<string, int, pathn*> >().swap(__models);
+     vector<tuple<string, string, pathn*> >().swap(stored_model_1layer);
 }
 
 template <typename... params>
 void model_2layer::add_model(const struct component &_component, const params&... _params) {
+
+    string                      _configuration = "";
     
-    vector<pair<int, pathn*> >  __params = {_params...};
+    vector<pair<size_t, pathn*> >  __params =  {_params...};
 
     for (auto _param : __params) {
-        __models.push_back(make_tuple(_component.name, _param.first, _param.second));
+        for (auto __configuration : _component.configurations)
+            if (std::hash<string>{}(__configuration) == _param.first)
+                _configuration = __configuration;
+
+        if (_configuration.empty())
+            throw new invalid_argument("Configuration (id " + to_string(_param.first) + ") is invalid");
+
+        stored_model_1layer.push_back(make_tuple(_component.name, _configuration, _param.second));
     }
 }
 
@@ -101,26 +111,33 @@ vector<pair<string, pathn*> > model_2layer::models() {
     if (!_models.empty())
         return _models;
 
-    if (_profiler) {
-
-    }
-
     for (auto component : _config->components()) {
         
         _model = new pathn();
 
         for (auto configuration : component.configurations) {
             
-            if (_profiler)
-                __model_1layer = new model_1layer(configuration, _profiler);
-            else
-            {
-                // todo
-            }
-                            
-            _model_1layer = __model_1layer->get_model();
+            if (_profiler) {
 
-            delete __model_1layer;
+                __model_1layer = new model_1layer(configuration, _profiler);
+
+                _model_1layer = __model_1layer->get_model();
+
+                delete __model_1layer;
+            } else {
+                i = 0;
+                for (auto _stored_model_1layer : stored_model_1layer) {
+                    
+                    i++;
+
+                    if (static_cast<string>(get<0>(_stored_model_1layer)) == component.name &&
+                        static_cast<string>(get<1>(_stored_model_1layer)) == configuration
+                    ) {
+                        _model_1layer = static_cast<pathn*>(get<2>(_stored_model_1layer));
+                        stored_model_1layer.erase(stored_model_1layer.begin() + i);
+                    }
+                }
+            }
 
             power_1layer = _model_1layer->avg();
 

@@ -12,10 +12,6 @@ namespace plnr
         std::string                             name;
         int                                     size;
         std::vector<std::string>                configurations;
-        
-        // configurations order. The first int is the position inside configurations vector (amd - 1), the second int is the order on how configurations have to be sampled in the second layer model (is -1 if the model 2layer was still not generated, thus configurations are ordered as they arrived)
-
-        std::vector<std::pair<int, int> >       order;
     };
 
 
@@ -78,7 +74,7 @@ namespace plnr
         // returns configuration id
 
         template<typename... params>
-        int add_configuration(component __component, const params&... _params);
+        size_t add_configuration(const component &__component, const params&... _params);
     };
 }
 

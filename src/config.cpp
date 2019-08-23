@@ -2,6 +2,7 @@
 #include "../include/utility.hpp"
 #include "../include/config.hpp"
 
+#include <functional>
 #include <sys/stat.h>
 #include <algorithm>
 #include <cstdarg>
@@ -309,9 +310,6 @@ void config::configure() {
         _component.name = __component.name;
         _component.size = __component.size;
 
-        for (i = 1; i <= _component.configurations.size(); i++)
-            _component.order.emplace_back(i, i);
-
         settings.push_back(_component);
     }
 
@@ -320,32 +318,18 @@ void config::configure() {
 
 void config::order() {
 
-    int             i;
-    vector<string>  ordered_configurations;
-
     if (ordered)
         return;
 
-    for (auto &__component : settings) {
-        ordered_configurations.swap(__component.configurations);
-
-        std::sort(ordered_configurations.begin(), ordered_configurations.end());
-
-        for (i = 0; i < __component.configurations.size(); i++) {
-            //__component.order.at(i).second
-        } 
-
-        //__component
-    }
-
-
-    //ordered = true;
+    for (auto &__component : settings)
+        std::sort(__component.configurations.begin(), __component.configurations.end());
 }
 
 vector<struct component> config::components() {
     
     load();
     configure();
+    order();
 
     return settings;
 }
@@ -376,7 +360,7 @@ int config::get_size(string name) {
 }
 
 template<typename... params>
-int config::add_configuration(component __component, const params&... _params) {
+size_t config::add_configuration(const component &__component, const params&... _params) {
 
     int                 i,
                         expected_size;
@@ -416,10 +400,9 @@ int config::add_configuration(component __component, const params&... _params) {
                 if (_configuration = configuration)
                     throw new invalid_argument("configration " + configuration + " is duplicated.");
                 
-            ___component.configurations.push_back(configuration.erase(0));
-            ___component.order.emplace_back(___component.size(), -1);
+            ___component.configurations.push_back(configuration);
 
-            return ___component.size();
+            return std::hash<string>{}(configuration);
         }
     
     settings.push_back(__component);
