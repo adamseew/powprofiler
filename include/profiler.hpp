@@ -21,7 +21,8 @@ namespace plnr
 
         pathn*      _profile;
 
-        std::mutex  started_mutex;
+        std::mutex  started_mutex,
+                    at_least_one_sample_mutex;
 
     public:
         profiler(config* _config, sampler* __sampler);

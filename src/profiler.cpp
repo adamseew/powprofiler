@@ -30,8 +30,7 @@ profiler::~profiler() { }
 
 pathn* profiler::profile(const string& component, int _milliseconds) {
 
-    if (_profile)
-        return _profile;
+    _profile = new pathn();
 
     double          timespan =          1000 / frequency,
                     sampled_timespan =  0,
@@ -53,6 +52,9 @@ pathn* profiler::profile(const string& component, int _milliseconds) {
 
     string          log_data;
 
+    started_mutex.lock();
+    at_least_one_sample_mutex.lock();
+
     thread          sampler_thread([&](){ 
         start_time = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
         last_result = start_time;
@@ -71,6 +73,8 @@ pathn* profiler::profile(const string& component, int _milliseconds) {
                 last_result = _last_result;
 
                 _profile->add(sample / _samples_count);
+
+                at_least_one_sample_mutex.unlock();
                 sample = vectorn(_sampler->get_sample());
 
                 _samples_count = 1;
@@ -90,6 +94,10 @@ pathn* profiler::profile(const string& component, int _milliseconds) {
             // this is the "library version execution"
 
             started_mutex.lock();
+        
+        /// it can happen that the component under analysis is too fast and no sample has been collected. So let's wait for at least one sample
+
+        at_least_one_sample_mutex.lock();
 
     });
     
@@ -102,6 +110,9 @@ pathn* profiler::profile(const string& component, int _milliseconds) {
         pthread_cancel(sampler_thread.native_handle());
         sampler_thread.join();
     }
+
+    started_mutex.unlock();
+    at_least_one_sample_mutex.unlock();
 
     overall_frequency = (1000.0 / (duration_cast<milliseconds>(
         system_clock::now().time_since_epoch() - start_time).count() / samples_count));

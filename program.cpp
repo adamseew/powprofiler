@@ -76,8 +76,9 @@ int main(int argc, char** argv) {
         }
 
         // system(("../splot.sh " + string(argv[2]) + " " + string(argv[2]) + "_1layer_.csv " + string(argv[2]) + "_battery.csv").c_str());
-    }
-
+    } else
+        throw runtime_error("missing configuration");
+    
     delete _model_2layer;
     delete _profiler;
     delete _sampler;

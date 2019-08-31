@@ -39,7 +39,7 @@ model_2layer::model_2layer(const params&... _params) {
         // so any only since cpp 17 ... no strong typization though
         
         //if (__params.at(i).get_type() != any::pair<struct component, pathn*>)
-        //    throw new invalid_argument(
+        //    throw invalid_argument(
         //        "bad argument (index " + to_string(i) + "). Expected pair<struct component, pathn*> but found " + __params.at(i).name()
         //    );
         
@@ -71,7 +71,7 @@ void model_2layer::add_model(const struct component &_component, const params&..
                 _configuration = __configuration;
 
         if (_configuration.empty())
-            throw new invalid_argument("Configuration (id " + to_string(_param.first) + ") is invalid");
+            throw invalid_argument("Configuration (id " + to_string(_param.first) + ") is invalid");
 
         stored_model_1layer.push_back(make_tuple(_component.name, _configuration, _param.second));
     }
