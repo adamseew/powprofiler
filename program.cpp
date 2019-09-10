@@ -56,8 +56,7 @@ int main(int argc, char** argv) {
 
         _config->load();
         _config->configure();
-        
-        _sampler = new sampler_tx2();
+
         _profiler = new profiler(_config, _sampler);
 
         _model_2layer = new model_2layer(_config, _profiler);
