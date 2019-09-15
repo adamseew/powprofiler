@@ -29,6 +29,8 @@ namespace plnr
         pathn*          _model;
 
     public:
+        model_1layer(profiler* __profiler);
+
         model_1layer(std::string _component, profiler* __profiler);
 
         model_1layer(std::string _component, std::string _arguments, profiler* __profiler);

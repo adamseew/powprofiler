@@ -1,9 +1,22 @@
 
 #include "../include/model_1layer.hpp"
 
+#include <thread>
+
 using namespace plnr;
 
 using std::string;
+using std::thread;
+
+model_1layer::model_1layer(profiler* __profiler) {
+    component = "";
+    arguments = "";
+    _profiler = __profiler;
+    _model = nullptr;
+    started = false;
+    stopped = false;
+}
+
 
 model_1layer::model_1layer(string _component, profiler* __profiler) {
     component = _component;
