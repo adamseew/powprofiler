@@ -1,4 +1,7 @@
 
+#include "utility.hpp"
+
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -28,6 +31,8 @@ namespace plnr
 
         std::vector<struct _component>          _settings;
         std::vector<struct component>           settings;
+
+        std::vector<std::string>                variadic_vector;
 
 
         std::string                             file,
@@ -73,8 +78,25 @@ namespace plnr
 
         // returns configuration id
 
+        size_t add_configuration(const component &__component, const std::vector<std::string> &_configurations);
+
+        // variadic overload of the above function, for comodity (so it can be invoked with a variable number of parameters)
+
         template<typename... params>
-        size_t add_configuration(const component &__component, const params&... _params);
+        size_t add_configuration(const component &__component, const std::string &_param, const params&... _params)  {
+
+            std::vector<std::string>    variadic_vector;
+
+            int                         dummy[] = {
+                0, (variadic_vector.push_back(_params), 0)...
+            };
+
+            (void) dummy;
+
+            variadic_vector.insert(variadic_vector.begin(), _param);
+
+            return add_configuration(__component, variadic_vector);
+        }
     };
 }
 

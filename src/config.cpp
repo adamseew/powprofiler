@@ -359,54 +359,42 @@ int config::get_size(string name) {
     throw invalid_argument("No component with name " + name + " found");
 }
 
-template<typename... params>
-size_t config::add_configuration(const component &__component, const params&... _params) {
+size_t config::add_configuration(const component &__component, const vector<string> &_configurations) {
 
     int                 i,
                         expected_size;
 
     string              configuration;
 
-    std::vector<string> __params = {_params...};
-
     for (auto &___component : settings)
         if (__component.name == ___component.name) {
             if (!___component.configurations.empty()) {
                 expected_size = utility_split(__component.configurations.at(0), ' ').size() - 1;
 
-                if (__params.size() != expected_size)
-                    throw new logic_error("component " + __component.name + " bad configuration size. Expected " + to_string(expected_size) + " but found " + to_string(__params.size()));
+                if (_configurations.size() != expected_size)
+                    throw new logic_error("component " + __component.name + " bad configuration size. Expected " + to_string(expected_size) + " but found " + to_string(_configurations.size()));
             }
-            
+
             ___component.size++;
 
             configuration = "";
 
-            for (auto _param : __params) {
-                
-                // so any only since cpp 17 ... no strong typization though
-
-                //if (__params.at(i).get_type() != any::string)
-                //    throw new invalid_argument(
-                //        "bad argument (index " + to_string(i) + "). Expected string but found " + __params.at(i).name()
-                //    );
-
+            for (auto _param : _configurations)
                 configuration += " " + _param;
-            }
 
             configuration = configuration.erase(0);
 
             for (auto _configuration : ___component.configurations)
-                if (_configuration = configuration)
+                if (_configuration == configuration)
                     throw new invalid_argument("configration " + configuration + " is duplicated.");
-                
+
             ___component.configurations.push_back(configuration);
 
             return std::hash<string>{}(configuration);
         }
-    
+
     settings.push_back(__component);
-    return add_configuration(__component, _params...);
+    return add_configuration(__component, _configurations);
 }
 
 void config::nested_combinations(struct _component ___component, string result_nested, vector<string>& combinations, int i, int shift, int last) {
