@@ -29,7 +29,7 @@ namespace plnr
                             sampled_frequency = std::numeric_limits<double>::max(),
                             sampled_timespan =  0,
                             avg_frequency =     0,
-                            timespan =          1000 / frequency;
+                            timespan;
 
         std::string         process_path;
 

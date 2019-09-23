@@ -1,7 +1,6 @@
 
 #include "utility.hpp"
 
-#include <stdexcept>
 #include <string>
 #include <vector>
 
