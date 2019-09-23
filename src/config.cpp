@@ -3,7 +3,6 @@
 #include "../include/config.hpp"
 
 #include <functional>
-#include <sys/stat.h>
 #include <algorithm>
 #include <cstdarg>
 #include <fstream>
@@ -123,7 +122,7 @@ void config::load() {
     if (loaded)
         return;
 
-    if (!file_exists(file))
+    if (!utility_file_exists(file))
         throw logic_error("configuration file " + file + " does not exist");
 
     std::ifstream       input_cfg(file);
@@ -209,7 +208,7 @@ void config::load() {
 
         __component.src = utility_trim(property_value.at(1));
 
-        if (!file_exists(__component.src))
+        if (!utility_file_exists(__component.src))
             throw logic_error("configuration file error line " + to_string(line_number) + ". Source file " + __component.src + " does not exist");
 
         __component.fixed_arguments.clear();
@@ -527,11 +526,4 @@ void config::read_format_line(std::ifstream& file, string &line, int &line_numbe
 bool config::trim_compare(const string& _left, const string& _right) {
    
     return utility_trim(_left).compare(_right) == 0;
-}
-
-
-bool config::file_exists(const std::string& name) {
-
-    struct stat buffer;   
-    return (stat (name.c_str(), &buffer) == 0); 
 }

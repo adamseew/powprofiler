@@ -12,6 +12,8 @@ namespace plnr
     const std::string utility_trim(const std::string& source);
 
     bool utility_is_number(const std::string& source);
+
+    bool utility_file_exists(const std::string& name);
 }
 
 #endif

@@ -101,6 +101,10 @@ pathn::~pathn() {
 
 string pathn::save(config* _config, const component& _component) {
 
+    int     i;
+
+    string  file_name;
+
     // creating the directory where to save pathn
 
     if (mkdir(_config->get_directory().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1) {
@@ -108,7 +112,12 @@ string pathn::save(config* _config, const component& _component) {
             throw std::runtime_error("error creating the directory " + _config->get_directory() + ". " + strerror(errno));
     }
 
-    save(_config->get_directory() + "/" + _component.name + ".csv");
+    file_name = _config->get_directory() + "/" + _component.name + ".csv";
+
+    for (i = 2; utility_file_exists(file_name); i++)
+        file_name = _config->get_directory() + "/" + _component.name + "_" + to_string(i) + ".csv";
+
+    return save(file_name);
 }   
 
 string pathn::save() {

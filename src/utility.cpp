@@ -1,6 +1,7 @@
 
 #include "../include/utility.hpp"
 
+#include <sys/stat.h>
 #include <algorithm>
 #include <iostream>
 #include <string>
@@ -53,4 +54,10 @@ bool plnr::utility_is_number(const string& source) {
     return  !source.empty() && std::find_if(source.begin(), source.end(), [](char c) { 
         return !(std::isdigit(c) || c == '.');  
     }) == source.end();
+}
+
+bool plnr::utility_file_exists(const string& name) {
+
+    struct stat buffer;
+    return (stat (name.c_str(), &buffer) == 0);
 }
