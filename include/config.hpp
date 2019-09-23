@@ -7,14 +7,23 @@
 #ifndef PLNR_CONFIG_H
 #define PLNR_CONFIG_H
 
+#define __D_DEFAULT_FREQUENCY__     10
+#define __D_DEFAULT_H__             0.01
+
 namespace plnr
 {
 
     struct component {
-        component() : name(""), size(0) { }
-        
+        component(void) : 
+            name(""), size(0), runtime(0) { }
+        component(const std::string& _name) : 
+            name(_name), size(0), runtime(0) { }
+        component(const std::string& _name, int _runtime) : 
+            name(_name), size(0), runtime(_runtime) { }
+
         std::string                             name;
-        int                                     size;
+        int                                     size,
+                                                runtime;
         std::vector<std::string>                configurations;
     };
 
@@ -25,7 +34,8 @@ namespace plnr
         struct _component {
             std::string                         name,
                                                 src;
-            int                                 size;
+            int                                 size,
+                                                runtime;
             std::vector<std::string>            fixed_arguments;
             std::vector<int>                    range_arguments;    
             std::vector<std::pair<int, int> >   positions;};
@@ -41,8 +51,7 @@ namespace plnr
         int                                     frequency;
         double                                  h;
         bool                                    loaded,
-                                                configured,
-                                                ordered;
+                                                configured;
 
         void read_format_line(std::ifstream& file, std::string &line, int &line_number);
         bool trim_compare(const std::string& _left, const std::string& _right);
@@ -52,10 +61,16 @@ namespace plnr
 
     public:
         config(const std::string& _file);
-
-        config(component __component, double _frequency, double _h);
-
+        
+        config();
+        
+        config(double _frequency);
+        
         config(double _frequency, double _h);
+        
+        config(double _frequency, const std::string& _directory);
+        
+        config(double _frequency, double _h, const std::string& _directory);
 
         ~config();
 
@@ -63,11 +78,11 @@ namespace plnr
 
         double get_h();
 
+        const std::string get_directory();
+
         void load();
 
         void configure();
-
-        void order();
 
         std::vector<struct component> components();
 

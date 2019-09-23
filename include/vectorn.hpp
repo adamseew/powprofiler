@@ -5,10 +5,11 @@
 #define PLNR_VECTORN_H
 
 // from and to where is possible to include metrics in the vectorn_flags structure i.e., LOWER_VECTORN_FLAGS_LIMIT <= metric < UPPER_VECTORN_FLAGS_LIMIT
+
 #define LOWER_VECTORN_FLAGS_LIMIT   100
 #define UPPER_VECTORN_FLAGS_LIMIT   200
-#define VECTORN_FLAGS_GAIN                30
-#define VECTORN_FLAGS_LOSS                -30
+#define VECTORN_FLAGS_GAIN          30
+#define VECTORN_FLAGS_LOSS          -30
 
 namespace plnr
 {

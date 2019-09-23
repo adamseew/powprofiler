@@ -22,36 +22,63 @@ using std::pair;
 
 config::config(const string& _file) {
 
-    /// calling powprof by passing a configuration file, this mean that user have to call load to load data from file, and configure later to generate all the configurations from file
+    /// calling powprof by passing a configuration file, this mean that user have to call load to load data from file, and configure later to generate all the configurations from file. Note: one can run the configuration file and the still decide to call powprof in the 'library' modality
 
-    frequency = 10;
-    h = 0.01;
-    
+    frequency = __D_DEFAULT_FREQUENCY__;
+    h = __D_DEFAULT_H__;
+    directory = "";
     file = _file;
     loaded = false;
     configured = false;
-    ordered = true;
 }
 
-/// following two constructors are used when powprof is compiled and used as a library, thus configurations run as they are added
+/// following constructors are used when powprof is compiled and used as a library, thus configurations run as they are added
 
-config::config(component __component, double _frequency, double _h) {
-    frequency = _frequency;
-    h = _h;
-    settings.push_back(__component);
+config::config() {
+    frequency = __D_DEFAULT_FREQUENCY__;
+    h = __D_DEFAULT_H__;
+    directory = "";
+
+    // so we don't need to read from file, one will add the components and their configurations manually, in the 'library' modality
 
     loaded = true;
     configured = true;
-    ordered = false;
+}
+
+config::config(double _frequency) {
+    frequency = _frequency;
+    h = __D_DEFAULT_H__;
+    directory = "";
+
+    // so we don't need to read from file, one will add the components and their configurations manually, in the 'library' modality
+
+    loaded = true;
+    configured = true;
 }
 
 config::config(double _frequency, double _h) {
     frequency = _frequency;
     h = _h;
-    
+    directory = "";
     loaded = true;
     configured = true;
-    ordered = false;
+}
+
+config::config(double _frequency, const string& _directory) {
+    frequency = _frequency;
+    h = __D_DEFAULT_H__;
+    directory = _directory;
+    loaded = true;
+    configured = true;
+}
+
+
+config::config(double _frequency, double _h, const string& _directory) {
+    frequency = _frequency;
+    h = _h;
+    directory = _directory;
+    loaded = true;
+    configured = true;
 }
 
 config::~config() { 
@@ -65,6 +92,10 @@ double config::get_frequency() {
 
 double config::get_h() {
     return h;
+}
+
+const string config::get_directory() {
+    return directory;
 }
 
 void config::load() {
@@ -235,22 +266,39 @@ void config::load() {
                 }
 
                 __component.size++;
+
+                // very basic check if the range is valid
+
+                if ( max < 0 || 
+                     min < 0 ||
+                    (max - min) < 0 || 
+                    (step > 0 && (max - min) < step) || 
+                    (step < 0 && (max - min) < step * step
+                   )) {
+                    throw logic_error("configuration file error line " + to_string(line_number) + ". Invalid format for range argument. Use min,max,step pattern where min,max are positive integers, step can be a natural or a power expressed as pow(step)");
+                }
+
             } else if (trim_compare(property_value.at(0), "fixed")) {
+                
                 __component.positions.emplace_back(0, __component.fixed_arguments.size());
                 was_previous_range = false;
 
                 __component.fixed_arguments.push_back(utility_trim(property_value.at(1)));
 
+            } else if  (trim_compare(property_value.at(0), "runtime")) {
+                
+                try {
+                    __component.runtime = stoi(utility_trim(property_value.at(1)));
+                } catch (exception &_exception) {
+                    throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected integer value but found " + line);    
+                }
+
+                if (__component.runtime <= 0)
+                    throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Cannot run for " + to_string(__component.runtime) + " ms");  
+
             } else {
+
                 throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Property " + utility_trim(property_value.at(0)) + " not recognized");
-            }
-            if ( max < 0 || 
-                 min < 0 ||
-                (max - min) < 0 || 
-                (step > 0 && (max - min) < step) || 
-                (step < 0 && (max - min) < step * step
-               )) {
-                throw logic_error("configuration file error line " + to_string(line_number) + ". Invalid format for range argument. Use min,max,step pattern where min,max are positive integers, step can be a natural or a power expressed as pow(step)");
             }
 
             if (input_cfg.peek() == EOF)
@@ -264,8 +312,10 @@ void config::load() {
             break;
     }
     
-    if (components_count < 1)
-        throw logic_error("configuration file error line " + to_string(line_number) + ". At least one component expected");
+    // this is allowed, as soon as add_component (and/or add_configuration) is invoked
+
+    // if (components_count < 1)
+    //    throw logic_error("configuration file error line " + to_string(line_number) + ". At least one component expected");
 
     input_cfg.close();
     loaded = true;
@@ -316,20 +366,10 @@ void config::configure() {
     configured = true;
 }
 
-void config::order() {
-
-    if (ordered)
-        return;
-
-    for (auto &__component : settings)
-        std::sort(__component.configurations.begin(), __component.configurations.end());
-}
-
 vector<struct component> config::components() {
     
     load();
     configure();
-    order();
 
     return settings;
 }
