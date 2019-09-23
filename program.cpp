@@ -27,11 +27,12 @@ int main(int argc, char** argv) {
 
     setpriority(PRIO_PROCESS, getpid(), -20);
 
-    config*             _config;
-    sampler*            _sampler;
-    profiler*           _profiler;
+    config*     _config;
+    sampler*    _sampler;
+    profiler*   _profiler;
+    pathn*      _model;
 
-    model_2layer*       _model_2layer;
+    model*      _model_2layer;
 
     _sampler = new sampler_tx2();
     if (!_sampler->dryrun()) {
@@ -59,18 +60,20 @@ int main(int argc, char** argv) {
 
         _profiler = new profiler(_config, _sampler);
 
-        _model_2layer = new model_2layer(_config, _profiler);
+        for (auto _component : _config->components()) {
 
-        for (auto model : _model_2layer->models()) {
+            _model_2layer = new model_2layer(_config, _profiler, _component);
 
             // use following for approximation method
             // model.second->approximate(degree);
 
-            model.second->save(model.first + ".csv");
+            _model = _model_2layer->get_model();
+
+            _model->save(_component.name + ".csv");
             
-            if (_config->get_size(model.first) < 3) { } 
+            if (_component.size == 2) { } 
             
-            else if (_config->get_size(model.first) < 4) { }
+            else if (_component.size == 3) { }
 
         }
 

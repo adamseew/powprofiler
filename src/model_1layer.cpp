@@ -9,36 +9,30 @@ using std::string;
 using std::thread;
 
 model_1layer::model_1layer(profiler* __profiler) {
-    component = "";
-    arguments = "";
+
+    _config = nullptr;
     _profiler = __profiler;
     _model = nullptr;
     started = false;
     stopped = false;
 }
 
+model_1layer::model_1layer(config* __config, profiler* __profiler, const component& __component, size_t __configuration) {
 
-model_1layer::model_1layer(string _component, profiler* __profiler) {
-    component = _component;
-    arguments = "";
+    _config = __config;
     _profiler = __profiler;
-    _model = nullptr;
-    started = false;
-    stopped = false;
-}
 
-model_1layer::model_1layer(string _component, std::string _arguments, profiler* __profiler) {
-    component = _component;
-    arguments = _arguments;
-    _profiler = __profiler;
+    _component = __component;
+    _configuration = __configuration;
+
     _model = nullptr;
     started = false;
     stopped = false;
 }
 
 model_1layer::model_1layer(pathn* __model) {
-    component = "";
-    arguments = "";
+
+    _config = nullptr;
     _profiler = nullptr;
     _model = __model;
     started = false;
@@ -49,16 +43,16 @@ model_1layer::~model_1layer() { }
 
 pathn* model_1layer::get_model() {
 
-    if (_model == NULL) {
+    if (_model == nullptr) {
         
-        // todo
+        if (_config == nullptr)
+            throw std::runtime_error("Model not generated. Call start stop first, or use a valid config");
 
-        // the profiler profiles a specific component until the component has not terminated its execution. If we want to terminate in a specific amount of ms just call ...er->profile(component, ms)...
-
-        if (arguments.empty())
-            _model = _profiler->profile(component);
-        else
-            _model = _profiler->profile(component + " " + arguments);
+        
+        _model = _profiler->profile(
+            _component.name + " " + _config->get_configuration(_component, _configuration),
+            _component.runtime
+        );
     }
 
     return _model;

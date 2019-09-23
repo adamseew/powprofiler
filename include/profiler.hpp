@@ -64,8 +64,6 @@ namespace plnr
 
     public:
         profiler(config* _config, sampler* __sampler);
-
-        profiler(int _frequency, sampler* __sampler);
         
         ~profiler();
 

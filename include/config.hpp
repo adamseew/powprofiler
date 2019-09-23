@@ -86,9 +86,13 @@ namespace plnr
 
         std::vector<struct component> components();
 
+        std::vector<size_t> configurations(const component& __component);
+
         void add_component(component __component);
 
         struct component get_component(std::string name);
+
+        std::string get_configuration(const component& __component, size_t _configuration);
 
         int get_size(std::string name);
 

@@ -18,6 +18,7 @@ using std::to_string;
 using std::exception;
 using std::vector;
 using std::string;
+using std::hash;
 using std::pair;
 
 config::config(const string& _file) {
@@ -35,6 +36,7 @@ config::config(const string& _file) {
 /// following constructors are used when powprof is compiled and used as a library, thus configurations run as they are added
 
 config::config() {
+
     frequency = __D_DEFAULT_FREQUENCY__;
     h = __D_DEFAULT_H__;
     directory = "";
@@ -46,6 +48,7 @@ config::config() {
 }
 
 config::config(double _frequency) {
+
     frequency = _frequency;
     h = __D_DEFAULT_H__;
     directory = "";
@@ -57,6 +60,7 @@ config::config(double _frequency) {
 }
 
 config::config(double _frequency, double _h) {
+
     frequency = _frequency;
     h = _h;
     directory = "";
@@ -65,6 +69,7 @@ config::config(double _frequency, double _h) {
 }
 
 config::config(double _frequency, const string& _directory) {
+
     frequency = _frequency;
     h = __D_DEFAULT_H__;
     directory = _directory;
@@ -74,6 +79,7 @@ config::config(double _frequency, const string& _directory) {
 
 
 config::config(double _frequency, double _h, const string& _directory) {
+
     frequency = _frequency;
     h = _h;
     directory = _directory;
@@ -82,6 +88,7 @@ config::config(double _frequency, double _h, const string& _directory) {
 }
 
 config::~config() { 
+
     vector<struct _component>().swap(_settings);
     vector<struct component>().swap(settings);
 }
@@ -374,6 +381,21 @@ vector<struct component> config::components() {
     return settings;
 }
 
+vector<size_t> config::configurations(const component& __component) {
+
+    vector<size_t>  _configurations;
+
+    for (auto ___component : settings)
+        if (___component.name == __component.name)
+            for (auto configuration : __component.configurations)
+                _configurations.push_back(hash<string>{}(configuration));
+
+    if (_configurations.size() == 0)
+        throw invalid_argument("No configuration for " + __component.name + " component found");
+
+    return _configurations;
+}
+
 void config::add_component(component __component) {
 
     for (auto ___component : settings)
@@ -383,7 +405,18 @@ void config::add_component(component __component) {
     settings.push_back(__component);
 }
 
+string config::get_configuration(const component& __component, size_t _configuration) {
+    for (auto ___component : settings)
+        if (___component.name == __component.name)
+            for (auto __configuration : ___component.configurations)
+                if (hash<string>{}(__configuration) == _configuration)
+                    return __configuration;
+
+    throw invalid_argument("Either there is no component with name " + __component.name + ", or the component does not havy any configuration " + to_string(_configuration));
+}
+
 struct component config::get_component(string name) {
+
     for (auto _component : settings)
         if (_component.name == name)
             return _component;
@@ -392,6 +425,7 @@ struct component config::get_component(string name) {
 }
 
 int config::get_size(string name) {
+
     for (auto _component : settings)
         if (_component.name == name)
             return _component.size;
@@ -427,7 +461,7 @@ size_t config::add_configuration(const component &__component, const vector<stri
 
             ___component.configurations.push_back(configuration);
 
-            return std::hash<string>{}(configuration);
+            return hash<string>{}(configuration);
         }
 
     settings.push_back(__component);

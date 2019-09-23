@@ -1,5 +1,6 @@
 
 #include "profiler.hpp"
+#include "config.hpp"
 #include "pathn.hpp"
 
 #ifndef PLNR_MODEL_1LAYER_H
@@ -18,22 +19,27 @@ namespace plnr
     class model_1layer : public model {
 
     private:
-        bool            started,
-                        stopped;
+        bool                started,
+                            stopped;
 
-        std::string     component;
-        std::string     arguments;
+        struct component    _component;
+        size_t              _configuration;
 
-        profiler*       _profiler;
+        profiler*           _profiler;
+        
+        config*             _config;
 
-        pathn*          _model;
+        pathn*              _model;
 
     public:
+
+        // library modality (i.e., somebody calls start and stop)
+
         model_1layer(profiler* __profiler);
 
-        model_1layer(std::string _component, profiler* __profiler);
+        // regular call relative to a given component and configuration 
 
-        model_1layer(std::string _component, std::string _arguments, profiler* __profiler);
+        model_1layer(config* __config, profiler* __profiler, const component& __component, size_t __configuration);
 
         model_1layer(pathn* __model);
 

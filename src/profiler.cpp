@@ -20,14 +20,6 @@ profiler::profiler(config* _config, sampler* __sampler):stop_sampler_atomic(fals
     _profile = nullptr;
 }
 
-profiler::profiler(int _frequency, sampler* __sampler):stop_sampler_atomic(false) {
-
-    frequency = _frequency;
-    timespan =  1000 / frequency;
-    _sampler = __sampler;
-    _profile = nullptr;
-}
-
 profiler::~profiler() {
 
     pthread_cancel(sampler_thread.native_handle());
