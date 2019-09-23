@@ -387,7 +387,7 @@ vector<size_t> config::configurations(const component& __component) {
 
     for (auto ___component : settings)
         if (___component.name == __component.name)
-            for (auto configuration : __component.configurations)
+            for (auto configuration : ___component.configurations)
                 _configurations.push_back(hash<string>{}(configuration));
 
     if (_configurations.size() == 0)

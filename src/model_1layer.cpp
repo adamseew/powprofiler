@@ -50,7 +50,7 @@ pathn* model_1layer::get_model() {
 
         
         _model = _profiler->profile(
-            _component.name + " " + _config->get_configuration(_component, _configuration),
+            _config->get_configuration(_component, _configuration),
             _component.runtime
         );
     }
