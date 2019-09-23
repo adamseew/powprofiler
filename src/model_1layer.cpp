@@ -45,12 +45,15 @@ pathn* model_1layer::get_model() {
 
     if (_model == nullptr) {
         
-        if (_config == nullptr)
-            throw std::runtime_error("Model not generated. Call start stop first, or use a valid config");
-
-        
+        if (_config == nullptr ||
+            _component.src.empty())
+            throw std::runtime_error("model for " + _component.name + "cannot be generated. Call start stop first, or use a valid config");
+    
         _model = _profiler->profile(
-            _config->get_configuration(_component, _configuration),
+
+            // handling configuration as varying parameters
+
+            _component.src + " " + _config->get_configuration(_component, _configuration),
             _component.runtime
         );
     }

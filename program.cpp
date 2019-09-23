@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
 
             _model = _model_2layer->get_model();
 
-            _model->save(_component.name + ".csv");
+            _model->save(_config, _component);
             
             if (_component.size == 2) { } 
             

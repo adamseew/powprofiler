@@ -78,7 +78,7 @@ pathn* model_2layer::get_model() {
             
         configuration_string = _config->get_configuration(_component, _configuration);    
 
-        if (_profiler) {
+        if (!_component.src.empty()) {
 
             __model_1layer = new model_1layer(_config, _profiler, _component, _configuration);
 

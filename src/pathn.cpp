@@ -4,21 +4,23 @@
 
 #include <iostream>
 #include <iterator>
+#include <string.h>
 #include <fstream>
 #include <sstream>
 #include <cassert>
 #include <cstdio>
 #include <math.h>
 
+#include <sys/stat.h>
 #include <sys/time.h>
 
 using namespace plnr;
 
+using std::logic_error;
+using std::to_string;
+using std::string;
 using std::vector;
 using std::swap;
-using std::string;
-using std::to_string;
-using std::logic_error;
 using std::endl;
 
 pathn::pathn(int _length, vectorn* values) {
@@ -97,14 +99,26 @@ pathn::~pathn() {
     vector<vectorn>().swap(path);
 }
 
-std::string pathn::save() {
+string pathn::save(config* _config, const component& _component) {
+
+    // creating the directory where to save pathn
+
+    if (mkdir(_config->get_directory().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1) {
+        if(errno != EEXIST) 
+            throw std::runtime_error("error creating the directory " + _config->get_directory() + ". " + strerror(errno));
+    }
+
+    save(_config->get_directory() + "/" + _component.name + ".csv");
+}   
+
+string pathn::save() {
     struct timeval  _timeval;
 
     gettimeofday(&_timeval, NULL);
     return save("profile_" + to_string(_timeval.tv_sec * 1000 + _timeval.tv_usec / 1000) + ".csv");
 }
 
-std::string pathn::save(const string& file) {
+string pathn::save(const string& file) {
     int             i,
                     j;
 

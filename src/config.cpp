@@ -342,21 +342,27 @@ void config::configure() {
 
     for (auto &__component : _settings) {
         _component.configurations.clear();
-        _component.configurations.push_back(__component.src);
+        _component.src = __component.src;
+        _component.configurations.push_back("");
 
         for (auto position : __component.positions) {
-            if (position.first == 0)
+
+            if (position.first == 0) {
+
                 for (i = 0; i < _component.configurations.size(); i++)
                     _component.configurations.at(i) += " " + __component.fixed_arguments.at(position.second);
 
-            else {
+            } else {
+
                 arguments_combinations.clear();
                 nested_combinations(__component, "", arguments_combinations, __component.range_arguments.at(position.second), position.second, position.first); 
                 _configurations.clear();
+
                 for (i = 0; i < _component.configurations.size(); i++) {
                     for (auto combination : arguments_combinations)
-                        _configurations.push_back(_component.configurations.at(i) + combination);
+                        _configurations.push_back(_component.configurations.at(i) + combination.erase(0, 1)); // erase is an easy fix to delete the initial space
                 }
+
                 if (_configurations.size() > _component.configurations.size()) {
                     _component.configurations.clear();
                     _component.configurations.insert(_component.configurations.end(), _configurations.begin(), _configurations.end());
@@ -391,7 +397,7 @@ vector<size_t> config::configurations(const component& __component) {
                 _configurations.push_back(hash<string>{}(configuration));
 
     if (_configurations.size() == 0)
-        throw invalid_argument("No configuration for " + __component.name + " component found");
+        throw invalid_argument("no configuration for " + __component.name + " component found");
 
     return _configurations;
 }
@@ -412,7 +418,7 @@ string config::get_configuration(const component& __component, size_t _configura
                 if (hash<string>{}(__configuration) == _configuration)
                     return __configuration;
 
-    throw invalid_argument("Either there is no component with name " + __component.name + ", or the component does not havy any configuration " + to_string(_configuration));
+    throw invalid_argument("either there is no component with name " + __component.name + ", or the component does not havy any configuration " + to_string(_configuration));
 }
 
 struct component config::get_component(string name) {
@@ -421,7 +427,7 @@ struct component config::get_component(string name) {
         if (_component.name == name)
             return _component;
     
-    throw invalid_argument("No component with name " + name + " found");
+    throw invalid_argument("no component with name " + name + " found");
 }
 
 int config::get_size(string name) {
@@ -430,7 +436,7 @@ int config::get_size(string name) {
         if (_component.name == name)
             return _component.size;
     
-    throw invalid_argument("No component with name " + name + " found");
+    throw invalid_argument("no component with name " + name + " found");
 }
 
 size_t config::add_configuration(const component &__component, const vector<string> &_configurations) {

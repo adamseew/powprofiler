@@ -15,13 +15,14 @@ namespace plnr
 
     struct component {
         component(void) : 
-            name(""), size(0), runtime(0) { }
+            name(""), src(""), size(0), runtime(0) { }
         component(const std::string& _name) : 
-            name(_name), size(0), runtime(0) { }
+            name(_name), src(""), size(0), runtime(0) { }
         component(const std::string& _name, int _runtime) : 
-            name(_name), size(0), runtime(_runtime) { }
+            name(_name), src(""), size(0), runtime(_runtime) { }
 
-        std::string                             name;
+        std::string                             name,
+                                                src;
         int                                     size,
                                                 runtime;
         std::vector<std::string>                configurations;
@@ -42,9 +43,6 @@ namespace plnr
 
         std::vector<struct _component>          _settings;
         std::vector<struct component>           settings;
-
-        std::vector<std::string>                variadic_vector;
-
 
         std::string                             file,
                                                 directory;
@@ -107,13 +105,33 @@ namespace plnr
 
             std::vector<std::string>    variadic_vector;
 
-            int                         dummy[] = {
-                0, (variadic_vector.push_back(_params), 0)...
-            };
-
+            int                         dummy[] = { 0, (variadic_vector.push_back(_params), 0)... };
             (void) dummy;
-
             variadic_vector.insert(variadic_vector.begin(), _param);
+
+            return add_configuration(__component, variadic_vector);
+        }
+
+        template<typename... params>
+        size_t add_configuration(const component &__component, int _param, const params&... _params)  {
+
+            std::vector<std::string>    variadic_vector;
+
+            int                         dummy[] = { 0, (variadic_vector.push_back(std::to_string(_params)), 0)... };
+            (void) dummy;
+            variadic_vector.insert(variadic_vector.begin(), std::to_string(_param));
+
+            return add_configuration(__component, variadic_vector);
+        }
+
+        template<typename... params>
+        size_t add_configuration(const component &__component, double _param, const params&... _params)  {
+
+            std::vector<std::string>    variadic_vector;
+
+            int                         dummy[] = { 0, (variadic_vector.push_back(std::to_string(_params)), 0)... };
+            (void) dummy;
+            variadic_vector.insert(variadic_vector.begin(), std::to_string(_param));
 
             return add_configuration(__component, variadic_vector);
         }

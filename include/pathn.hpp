@@ -3,6 +3,7 @@
 #include <string>
 
 #include "vectorn.hpp"
+#include "config.hpp"
 
 #ifndef PLNR_PATHN_H
 #define PLNR_PATHN_H
@@ -30,6 +31,8 @@ namespace plnr
         std::string save();
 
         std::string save(const std::string& file);
+
+        std::string save(config* _config, const component& _component);
 
         const int columns() const;
 
