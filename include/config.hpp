@@ -11,6 +11,8 @@ namespace plnr
 {
 
     struct component {
+        component() : name(""), size(0) { }
+        
         std::string                             name;
         int                                     size;
         std::vector<std::string>                configurations;

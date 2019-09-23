@@ -361,32 +361,29 @@ int config::get_size(string name) {
 
 size_t config::add_configuration(const component &__component, const vector<string> &_configurations) {
 
-    int                 i,
-                        expected_size;
+    int                 i;
 
     string              configuration;
 
     for (auto &___component : settings)
         if (__component.name == ___component.name) {
-            if (!___component.configurations.empty()) {
-                expected_size = utility_split(__component.configurations.at(0), ' ').size() - 1;
 
-                if (_configurations.size() != expected_size)
-                    throw new logic_error("component " + __component.name + " bad configuration size. Expected " + to_string(expected_size) + " but found " + to_string(_configurations.size()));
-            }
+            if (!___component.configurations.empty() && _configurations.size() + 1 != ___component.size)
+                throw logic_error("component " + __component.name + " bad configuration size. Expected " + to_string(___component.size) + " but found " + to_string(_configurations.size() + 1));
+            
 
-            ___component.size++;
+            ___component.size = _configurations.size() + 1;
 
             configuration = "";
 
             for (auto _param : _configurations)
                 configuration += " " + _param;
 
-            configuration = configuration.erase(0);
+            configuration = configuration.erase(0, 1);
 
             for (auto _configuration : ___component.configurations)
                 if (_configuration == configuration)
-                    throw new invalid_argument("configration " + configuration + " is duplicated.");
+                    throw invalid_argument("configration " + configuration + " is duplicated.");
 
             ___component.configurations.push_back(configuration);
 
