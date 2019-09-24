@@ -89,6 +89,10 @@ namespace plnr
 
         struct component get_component(std::string name);
 
+        // this overload might be useful as the original component that have been added might have been modified (it was passed by copy not by reference)
+
+        struct component get_component(const component& __component);
+
         std::string get_configuration(const component& __component, size_t _configuration);
 
         int get_size(std::string name);

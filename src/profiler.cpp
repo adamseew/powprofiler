@@ -1,6 +1,8 @@
 
 #include "../include/profiler.hpp"
 
+#include <sys/wait.h>
+#include <unistd.h>
 #include <chrono> 
 #include <limits>
 
@@ -90,6 +92,9 @@ void profiler::init_threads() {
 
     benchmark_thread = thread([&](){
 
+        int     infp, 
+                outfp;        
+
         while (1) {
         
             // starting the benchmark thread that calls a component under specific configuration
@@ -97,7 +102,7 @@ void profiler::init_threads() {
             benchmark_start_mutex.lock();
 
             if (!process_path.empty())
-                system(process_path.c_str());
+                _pid_t = popen2(process_path.c_str(), &infp, &outfp); // =~ system(process_path.c_str());
             else
 
                 // this is the "library version execution"
@@ -138,14 +143,20 @@ void profiler::check_frequency() {
     }
 }
 
-void profiler::wait_sampler_terminate_benchmark(const string& _process_path) {
+void profiler::wait_sampler_terminate_benchmark() {
 
     sampler_done_mutex.lock(); // ~= sampler_thread.join();
 
-    system((
-        "kill $(ps aux | grep '" + _process_path + "' | awk '{print $2}')"
-    ).c_str()); // ~= pthread_cancel(benchmark_thread.native_handle());
-                //    benchmark_thread.join();
+    // a not very elegant way of doing it...
+
+    // system((
+    //     "kill $(ps aux | grep '" + _process_path + "' | awk '{print $2}')"
+    // ).c_str()); 
+
+    // a VERY elegant way of doing it
+    
+    pclose2(_pid_t); // ~= pthread_cancel(benchmark_thread.native_handle());
+                     //    benchmark_thread.join();
     benchmark_done_mutex.lock();
 
     // leaving ready for next invocation
@@ -191,7 +202,7 @@ pathn* profiler::profile(const string& _process_path, int _duration) {
 
     if (_duration > 0) {
         
-        wait_sampler_terminate_benchmark(_process_path);
+        wait_sampler_terminate_benchmark();
 
     // second modality of profiling
     //   2nd =>> given a path of an executable, profile until the executable is terminated. Then return the model
@@ -245,4 +256,62 @@ pathn* profiler::profile() {
 
         return _profile;
     }
+}
+
+pid_t profiler::popen2(const char *command, int *infp, int *outfp) {
+    
+    int     p_stdin[2],
+            p_stdout[2];
+
+    pid_t   pid;
+
+    if (pipe(p_stdin) != 0 || pipe(p_stdout) != 0)
+        return -1;
+
+    pid = fork();
+
+    if (pid < 0)
+        return pid;
+    else if (pid == 0) {
+
+        dup2(p_stdin[__P_READ__], STDIN_FILENO);
+        dup2(p_stdout[__P_WRITE__], STDOUT_FILENO);
+
+        //close unuse descriptors on child process.
+        close(p_stdin[__P_READ__]);
+        close(p_stdin[__P_WRITE__]);
+        close(p_stdout[__P_READ__]);
+        close(p_stdout[__P_WRITE__]);
+
+        //can change to any exec* function family.
+
+        execl("/bin/bash", "bash", "-c", command, NULL);
+        perror("execl");
+        exit(1);
+    }
+
+    // close unused descriptors on parent process.
+
+    close(p_stdin[__P_READ__]);
+    close(p_stdout[__P_WRITE__]);
+
+    if (infp == NULL)
+        close(p_stdin[__P_WRITE__]);
+    else
+        *infp = p_stdin[__P_WRITE__];
+
+    if (outfp == NULL)
+        close(p_stdout[__P_READ__]);
+    else
+        *outfp = p_stdout[__P_READ__];
+
+    return pid;
+}
+
+int profiler::pclose2(pid_t pid) {
+
+    int     internal_stat;
+
+    waitpid(pid, &internal_stat, 0);
+    return WEXITSTATUS(internal_stat);
 }

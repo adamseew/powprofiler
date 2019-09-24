@@ -10,6 +10,9 @@
 #ifndef PLNR_PROFILER_H
 #define PLNR_PROFILER_H
 
+#define __P_READ__      0
+#define __P_WRITE__     1
+
 namespace plnr
 {
     class profiler {
@@ -51,6 +54,8 @@ namespace plnr
 
         std::atomic_bool    stop_sampler_atomic;
 
+        std::atomic_int     _pid_t;
+
         std::thread         benchmark_thread,
                             sampler_thread;
 
@@ -58,9 +63,15 @@ namespace plnr
 
         void check_frequency();
 
-        void wait_sampler_terminate_benchmark(const std::string& _process_path);
+        void wait_sampler_terminate_benchmark();
 
         void wait_benchmark_terminate_sampler();
+
+        // utility to start a process and get its pid
+
+        pid_t popen2(const char *command, int *infp, int *outfp);
+
+        int pclose2(pid_t pid);
 
     public:
         profiler(config* _config, sampler* __sampler);

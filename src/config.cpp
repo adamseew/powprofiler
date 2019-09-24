@@ -341,7 +341,7 @@ void config::configure() {
 
     for (auto &__component : _settings) {
         _component.configurations.clear();
-        _component.src = __component.src;
+
         _component.configurations.push_back("");
 
         for (auto position : __component.positions) {
@@ -369,8 +369,10 @@ void config::configure() {
             }
         }
 
+        _component.runtime = __component.runtime;
         _component.name = __component.name;
         _component.size = __component.size;
+        _component.src = __component.src;
 
         settings.push_back(_component);
     }
@@ -427,6 +429,10 @@ struct component config::get_component(string name) {
             return _component;
     
     throw invalid_argument("no component with name " + name + " found");
+}
+
+struct component config::get_component(const component &__component) {
+    return get_component(__component.name);
 }
 
 int config::get_size(string name) {
