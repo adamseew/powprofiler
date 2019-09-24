@@ -14,7 +14,10 @@ using std::thread;
 using std::to_string;
 using std::numeric_limits;
 
-profiler::profiler(config* _config, sampler* __sampler):stop_sampler_atomic(false) {
+profiler::profiler(config* _config, sampler* __sampler):
+    stop_sampler_atomic(false),
+    terminate_sampler_atomic(false),
+    terminate_benchmark_atomic(false) {
 
     frequency = _config->get_frequency();
     timespan =  1000 / frequency;
@@ -24,8 +27,8 @@ profiler::profiler(config* _config, sampler* __sampler):stop_sampler_atomic(fals
 
 profiler::~profiler() {
 
-    pthread_cancel(sampler_thread.native_handle());
-    pthread_cancel(benchmark_thread.native_handle());
+    terminate_sampler_atomic = true;
+    terminate_benchmark_atomic = true;
 
     sampler_start_mutex.unlock();
     sampler_thread.join();
@@ -49,11 +52,16 @@ void profiler::init_threads() {
 
             sampler_start_mutex.lock();
 
+            if (terminate_sampler_atomic)
+                break;
+
             vectorn sample(_sampler->get_sample());
 
             needed_samples =    duration > 0 ?
                                 duration / timespan :
                                 numeric_limits<int>::max();
+
+            samples_count = 0;
 
             start_time = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
             last_result = start_time;
@@ -92,18 +100,22 @@ void profiler::init_threads() {
 
     benchmark_thread = thread([&](){
 
-        int     infp, 
-                outfp;        
-
         while (1) {
         
             // starting the benchmark thread that calls a component under specific configuration
 
             benchmark_start_mutex.lock();
 
-            if (!process_path.empty())
-                _pid_t = popen2(process_path.c_str(), &infp, &outfp); // =~ system(process_path.c_str());
-            else
+            if (terminate_benchmark_atomic)
+                break;
+
+            if (!process_path.empty()) {
+
+                pid_t_atomic = popen2(process_path.c_str(), nullptr, nullptr); // =~ system(process_path.c_str());
+
+                 waitpid(pid_t_atomic, nullptr, 0);
+
+            } else
 
                 // this is the "library version execution"
 
@@ -155,7 +167,7 @@ void profiler::wait_sampler_terminate_benchmark() {
 
     // a VERY elegant way of doing it
     
-    pclose2(_pid_t); // ~= pthread_cancel(benchmark_thread.native_handle());
+    kill(pid_t_atomic, 9); // ~= pthread_cancel(benchmark_thread.native_handle());
                      //    benchmark_thread.join();
     benchmark_done_mutex.lock();
 
@@ -197,7 +209,7 @@ pathn* profiler::profile(const string& _process_path, int _duration) {
 
     init_threads();
 
-    // first modality of profiling:
+    // first modality of profiling
     //   1st =>> given a path of an executable and the duration in ms, profile for that amount. Then terminate profiling and return model
 
     if (_duration > 0) {
@@ -260,13 +272,15 @@ pathn* profiler::profile() {
 
 pid_t profiler::popen2(const char *command, int *infp, int *outfp) {
     
-    int     p_stdin[2],
-            p_stdout[2];
-
     pid_t   pid;
 
-    if (pipe(p_stdin) != 0 || pipe(p_stdout) != 0)
-        return -1;
+    // just uncomment following lines if you need to redirect stdout/in somewhere else from the parent
+
+    // int     p_stdin[2],
+    //         p_stdout[2];
+
+    // if (pipe(p_stdin) != 0 || pipe(p_stdout) != 0)
+    //     return -1;
 
     pid = fork();
 
@@ -274,44 +288,25 @@ pid_t profiler::popen2(const char *command, int *infp, int *outfp) {
         return pid;
     else if (pid == 0) {
 
-        dup2(p_stdin[__P_READ__], STDIN_FILENO);
-        dup2(p_stdout[__P_WRITE__], STDOUT_FILENO);
+        // close(p_stdin[__P_WRITE__]);
+        // dup2(p_stdin[__P_READ__], __P_READ__);
+        // close(p_stdout[__P_READ__]);
+        // dup2(p_stdout[__P_WRITE__], __P_WRITE__);
 
-        //close unuse descriptors on child process.
-        close(p_stdin[__P_READ__]);
-        close(p_stdin[__P_WRITE__]);
-        close(p_stdout[__P_READ__]);
-        close(p_stdout[__P_WRITE__]);
-
-        //can change to any exec* function family.
-
-        execl("/bin/bash", "bash", "-c", command, NULL);
+        execl("/bin/sh", "sh", "-c", command, NULL);
         perror("execl");
         exit(1);
     }
 
-    // close unused descriptors on parent process.
+    // if (infp == NULL)
+    //     close(p_stdin[__P_WRITE__]);
+    // else
+    //     *infp = p_stdin[__P_WRITE__];
 
-    close(p_stdin[__P_READ__]);
-    close(p_stdout[__P_WRITE__]);
-
-    if (infp == NULL)
-        close(p_stdin[__P_WRITE__]);
-    else
-        *infp = p_stdin[__P_WRITE__];
-
-    if (outfp == NULL)
-        close(p_stdout[__P_READ__]);
-    else
-        *outfp = p_stdout[__P_READ__];
+    // if (outfp == NULL)
+    //     close(p_stdout[__P_READ__]);
+    // else
+    //     *outfp = p_stdout[__P_READ__];
 
     return pid;
-}
-
-int profiler::pclose2(pid_t pid) {
-
-    int     internal_stat;
-
-    waitpid(pid, &internal_stat, 0);
-    return WEXITSTATUS(internal_stat);
 }

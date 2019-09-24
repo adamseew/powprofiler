@@ -52,9 +52,11 @@ namespace plnr
                             sampler_done_mutex,
                             async_call_mutex;
 
-        std::atomic_bool    stop_sampler_atomic;
+        std::atomic_bool    stop_sampler_atomic,
+                            terminate_sampler_atomic,
+                            terminate_benchmark_atomic;
 
-        std::atomic_int     _pid_t;
+        std::atomic_int     pid_t_atomic;
 
         std::thread         benchmark_thread,
                             sampler_thread;
