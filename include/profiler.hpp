@@ -1,11 +1,11 @@
 
-#include <atomic>
-#include <thread>
-#include <mutex>
-
 #include "pathn.hpp"
 #include "sampler.hpp"
 #include "config.hpp"
+
+#include <atomic>
+#include <thread>
+#include <mutex>
 
 #ifndef PLNR_PROFILER_H
 #define PLNR_PROFILER_H

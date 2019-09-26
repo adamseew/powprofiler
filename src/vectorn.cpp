@@ -1,5 +1,6 @@
 
 #include "../include/vectorn.hpp"
+
 #include <iostream>
 #include <cassert>
 #include <math.h>

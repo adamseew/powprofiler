@@ -2,6 +2,8 @@
 #include "../include/utility.hpp"
 #include "../include/pathn.hpp"
 
+#include <sys/stat.h>
+#include <sys/time.h>
 #include <iostream>
 #include <iterator>
 #include <string.h>
@@ -10,9 +12,6 @@
 #include <cassert>
 #include <cstdio>
 #include <math.h>
-
-#include <sys/stat.h>
-#include <sys/time.h>
 
 using namespace plnr;
 

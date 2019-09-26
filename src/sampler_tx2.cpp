@@ -1,8 +1,9 @@
 
 #include "../include/sampler_tx2.hpp"
+
+#include <sys/fcntl.h>
 #include <stdexcept>
 #include <unistd.h>
-#include <sys/fcntl.h>
 
 using namespace plnr;
 

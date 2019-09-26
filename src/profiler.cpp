@@ -168,7 +168,7 @@ void profiler::wait_sampler_terminate_benchmark() {
     // a VERY elegant way of doing it
     
     kill(pid_t_atomic, 9); // ~= pthread_cancel(benchmark_thread.native_handle());
-                     //    benchmark_thread.join();
+                           //    benchmark_thread.join();
     benchmark_done_mutex.lock();
 
     // leaving ready for next invocation
