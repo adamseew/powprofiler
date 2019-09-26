@@ -87,7 +87,7 @@ pathn* model_2layer::get_model() {
             delete __model_1layer;
         } else {
             
-            // todo
+            // todo (so store a set of first layer models and iterate on them over each configuration. If a model of a configuration is missing, then just generate excpetion; this is the library [ROS] approach to be done in early October 2019)
         }
 
         power_1layer = _model_1layer->avg();
@@ -111,16 +111,19 @@ pathn* model_2layer::get_model() {
             }
 
             // columns for power
+
             working_copy = power_1layer;
             __flags = working_copy.get_flags();
             _flags.insert(_flags.end(), __flags.begin(), __flags.end());
                 
             // columns for energy
+
             working_copy.transform_flags(vectorn_flags::gain);
             __flags = working_copy.get_flags();
             _flags.insert(_flags.end(), __flags.begin(), __flags.end());
 
             // columns for soc
+            
             working_copy.transform_flags(vectorn_flags::gain);
             __flags = working_copy.get_flags();
             _flags.insert(_flags.end(), __flags.begin(), __flags.end());

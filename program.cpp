@@ -9,17 +9,16 @@
 #include "include/sampler_tx2.hpp"
 #include "include/profiler.hpp"
 
-#include <iostream>
-#include <fstream>
-#include <unistd.h>
-
-#include <sys/time.h>
 #include <sys/resource.h>
-
-using std::runtime_error;
+#include <sys/time.h>
+#include <iostream>
+#include <unistd.h>
+#include <fstream>
 
 using namespace plnr;
 using namespace std;
+
+using std::runtime_error;
 
 int main(int argc, char** argv) {
 

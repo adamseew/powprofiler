@@ -1,8 +1,9 @@
 
 #include "../include/sampler_nano.hpp"
+
+#include <sys/fcntl.h>
 #include <stdexcept>
 #include <unistd.h>
-#include <sys/fcntl.h>
 
 using namespace plnr;
 

@@ -142,6 +142,7 @@ void config::load() {
             break;
 
         if (trim_compare(line, "[components]"))
+
             // line containing different components configuration ([components]) reached
 
             break;
@@ -187,6 +188,7 @@ void config::load() {
         throw runtime_error("configuration file bad format line " + to_string(line_number) + ". Expected a component description but found " + line);
 
     for ( ; ; ) {
+        
         // expecting new component
 
         property_value = utility_split(line, '.');
