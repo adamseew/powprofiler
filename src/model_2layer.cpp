@@ -11,6 +11,7 @@
 using namespace plnr;
 
 using std::invalid_argument;
+using std::runtime_error;
 using std::make_tuple;
 using std::exception;
 using std::to_string;
@@ -86,8 +87,13 @@ pathn* model_2layer::get_model() {
 
             delete __model_1layer;
         } else {
-            
-            // todo (so store a set of first layer models and iterate on them over each configuration. If a model of a configuration is missing, then just generate excpetion; this is the library [ROS] approach to be done in early October 2019)
+
+            for (auto stored_model : stored_models)
+                if (_configuration == stored_model.first)
+                    _model_1layer = stored_model.second;
+
+            if (_model_1layer)
+                continue;
         }
 
         power_1layer = _model_1layer->avg();
@@ -178,4 +184,30 @@ pathn* model_2layer::get_model() {
     merged_initialized = false;
 
     return _model;
+}
+
+void model_2layer::add_model(size_t _configuration, pathn* _model) {
+    
+    for (auto stored_model : stored_models)
+        if (stored_model.first == _configuration)
+            throw runtime_error("the configuration was added before");
+
+    // just checking if the configuration is stored in the config and saving it
+    
+    _config->get_configuration(_component, _configuration);
+
+    stored_models.emplace_back(_configuration, _model);
+}
+
+void model_2layer::add_model(vector<pathn*> _models) {
+
+    int             i;
+    
+    vector<size_t>  configurations_per_component;
+
+    if (configurations_per_component.size() != _models.size())
+        throw invalid_argument("models size does not equal to the number of configuration of " + _component.name + " component. Pass " + to_string(configurations_per_component.size()) + " models");
+
+    for (i = 0; i < _models.size(); i++)
+        add_model(configurations_per_component.at(i), _models.at(i));
 }

@@ -104,7 +104,7 @@ namespace plnr
 
         size_t add_configuration(const component &__component, const std::vector<std::string> &_configurations);
 
-        // variadic overload of the above function, for comodity (so it can be invoked with a variable number of parameters)
+        // variadic overload of the above function, for commodity (so it can be invoked with a variable number of parameters)
 
         template<typename... params>
         size_t add_configuration(const component &__component, const std::string &_param, const params&... _params)  {
