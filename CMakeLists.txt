@@ -1,30 +1,37 @@
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(
+             VERSION 3.0
+            )
 
-project (powprofiler)
+set         (POWPROF powprofiler)
+set         (LIBPOWPROF powprof)
 
-set(SOURCES
-    program.cpp
-    src/config.cpp
-    src/integrator_rk4.cpp
-    src/model_1layer.cpp
-    src/model_2layer.cpp
-    src/model_battery.cpp
-    src/pathn.cpp
-    src/profiler.cpp
-    src/sampler_nano.cpp
-    src/sampler_odroid.cpp
-    src/sampler_tx2.cpp
-    src/soc_1resistor.cpp
-    src/utility.cpp
-    src/vectorn.cpp
-)
+project     (${POWPROF} VERSION 1.0)
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -std=c++11 -pthread" CACHE STRING "Set C++ Compiler Flags" FORCE)
+file        (GLOB SOURCES 
+             program.cpp
+             src/*.cpp
+            )
 
-add_executable(powprofiler ${SOURCES})
+set         (CMAKE_CXX_STANDARD 11)
+set         (CMAKE_CXX_STANDARD_REQUIRED True)
 
-target_include_directories(powprofiler
-    PRIVATE
-        ${PROJECT_SOURCE_DIR}/include
-)
+add_library (powprof_obj OBJECT ${SOURCES})
+
+set_property(TARGET powprof_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
+
+add_library (${LIBPOWPROF}_shared SHARED $<TARGET_OBJECTS:powprof_obj>)
+add_library (${LIBPOWPROF}_static STATIC $<TARGET_OBJECTS:powprof_obj>)
+
+add_executable(
+             ${POWPROF} $<TARGET_OBJECTS:powprof_obj>
+            )
+
+target_link_libraries(
+             ${POWPROF} pthread
+            )
+
+target_include_directories(
+             ${POWPROF} PRIVATE
+             ${PROJECT_SOURCE_DIR}/include
+            )
