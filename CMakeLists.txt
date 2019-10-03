@@ -3,8 +3,7 @@ cmake_minimum_required(
              VERSION 3.0
             )
 
-set         (POWPROF powprofiler)
-set         (LIBPOWPROF powprof)
+set         (POWPROF powprof)
 
 project     (${POWPROF} VERSION 1.0)
 
@@ -16,15 +15,15 @@ file        (GLOB SOURCES
 set         (CMAKE_CXX_STANDARD 11)
 set         (CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_library (powprof_obj OBJECT ${SOURCES})
+add_library (${POWPROF}_obj OBJECT ${SOURCES})
 
-set_property(TARGET powprof_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
+set_property(TARGET ${POWPROF}_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
 
-add_library (${LIBPOWPROF}_shared SHARED $<TARGET_OBJECTS:powprof_obj>)
-add_library (${LIBPOWPROF}_static STATIC $<TARGET_OBJECTS:powprof_obj>)
+add_library (${POWPROF}_shared SHARED $<TARGET_OBJECTS:${POWPROF}_obj>)
+add_library (${POWPROF}_static STATIC $<TARGET_OBJECTS:${POWPROF}_obj>)
 
 add_executable(
-             ${POWPROF} $<TARGET_OBJECTS:powprof_obj>
+             ${POWPROF} $<TARGET_OBJECTS:${POWPROF}_obj>
             )
 
 target_link_libraries(
