@@ -12,19 +12,19 @@ To run it, you will need one of the following embedded devices: NVIDIA Jetson Na
 ### Setup
 Just run the following steps and you should be ok. They generate the executable along with the static and dynamic libraries to include powprof in your code. 
 
-1. First, clone the repo
+* First, clone the repo
 ```bash
 git clone https://bitbucket.org/adamseewpowprofiler.git
 cd powprofiler
 ```
-2. Then, continue with the typical `cmake` compilation flow. Here is a quick reminder
+* Then, continue with the typical `cmake` compilation flow. Here is a quick reminder
 ```bash
 mkdir build
 cd build
 cmake ..
 make
 ```
-3. You can include powprof in the environment variable so you can run it directly from bash
+* You can include powprof in the environment variable so you can run it directly from bash
 ```bash
 echo 'export PATH=${PATH}:'$PWD >> ~.bashrc
 source ~/.bashrc
@@ -49,6 +49,7 @@ To build a model you need to use powprof along with a configuration file. Please
 ```
 
 Instead of the dots in the above slice of code, you have to specify:
+
 * __src__ the source of the executable. Note that the executable must accept some arguments that change its state. In the example in [config3.cfg](config3.cfg) those are matrix size and exponent
 * __range__ (1 or more) uses the pattern min, max, step (with `pow(n)` you allow only values that are power of `n`). For the example above, powprof generates configurations 20, 30, 40, 50, and 60 with the following line. If you have more range entries, powprof combines them automatically 
 ```conf
