@@ -12,9 +12,9 @@ To run it, you will need one of the following embedded devices: NVIDIA Jetson Na
 ### Setup
 Just run the following steps and you should be ok. They generate the executable along with the static and dynamic libraries to include powprof in your code. 
 
-* First, clone the repo
+* First, clone the repo (you will find the same repo mirrored on [bitbucket](https://bitbucket.org/adamseew/powprofiler.git) and [github](https://github.com/adamseew/powprofiler.git))
 ```bash
-git clone https://bitbucket.org/adamseewpowprofiler.git
+git clone https://bitbucket.org/adamseew/powprofiler.git
 cd powprofiler
 ```
 * Then, continue with the typical `cmake` compilation flow. Here is a quick reminder
