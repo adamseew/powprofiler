@@ -1,13 +1,5 @@
 
-#include "include/integrator_rk4.hpp"
-#include "include/sampler_odroid.hpp"
-#include "include/soc_1resistor.hpp"
-#include "include/model_battery.hpp"
-#include "include/model_1layer.hpp"
-#include "include/model_2layer.hpp"
-#include "include/sampler_nano.hpp"
-#include "include/sampler_tx2.hpp"
-#include "include/profiler.hpp"
+#include "include/powprof.hpp"
 
 #include <sys/resource.h>
 #include <sys/time.h>
