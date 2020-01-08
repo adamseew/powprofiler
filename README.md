@@ -24,10 +24,18 @@ cd build
 cmake ..
 make
 ```
-* You can include powprof in the environment variable so you can run it directly from bash
+* You can include powprof in the environment variable so you can run it directly from bash by calling `powprofile`
 ```bash
 echo 'export PATH=${PATH}:'$PWD >> ~.bashrc
 source ~/.bashrc
+```
+* In case you wish to use powprof in its asynchronous library version, just build the shared library with
+```bash
+sudo make install
+```
+* Make sure that the cache with your shared libraries is up-to-date before including powprof in your project with `#include <powprof/async.h>`
+```bash
+sudo ldconfig
 ```
 
 That's all. Now you can use powprof command to build your computational energy models.

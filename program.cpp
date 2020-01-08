@@ -1,5 +1,18 @@
 
-#include "include/powprof.hpp"
+#include "include/config.hpp"
+#include "include/integrator_rk4.hpp"
+#include "include/model_1layer.hpp"
+#include "include/model_2layer.hpp"
+#include "include/model_battery.hpp"
+#include "include/pathn.hpp"
+#include "include/profiler.hpp"
+#include "include/sampler_nano.hpp"
+#include "include/sampler_odroid.hpp"
+#include "include/sampler_tx2.hpp"
+#include "include/sampler.hpp"
+#include "include/soc_1resistor.hpp"
+#include "include/utility.hpp"
+#include "include/vectorn.hpp"
 
 #include <sys/resource.h>
 #include <sys/time.h>
@@ -60,15 +73,20 @@ int main(int argc, char** argv) {
 
             _model = _model_2layer->get_model();
 
+            // function save return the name of the file with the results
+
             _model->save(_config, _component);
-            
+    
+            // this condition means that a 2D model has been generated
+
             if (_component.size == 2) { } 
+
+            // this that a 3D one has been generated
             
             else if (_component.size == 3) { }
 
         }
 
-        // system(("../splot.sh " + string(argv[2]) + " " + string(argv[2]) + "_1layer_.csv " + string(argv[2]) + "_battery.csv").c_str());
     } else
         throw runtime_error("missing configuration file");
     
