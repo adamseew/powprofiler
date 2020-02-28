@@ -26,7 +26,7 @@ make
 ```
 * You can include powprof in the environment variable so you can run it directly from bash by calling `powprofile`
 ```bash
-echo 'export PATH=${PATH}:'$PWD >> ~.bashrc
+echo 'export PATH=${PATH}:'$PWD >> ~/.bashrc
 source ~/.bashrc
 ```
 * In case you wish to use powprof in its asynchronous library version, just build the shared library with
