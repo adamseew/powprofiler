@@ -42,7 +42,7 @@ namespace plnr
         // variadic overload of the above function, for commodity (so it can be invoked with a variable number of parameters)
 
         template<typename... params>
-        size_t add_model(pathn* _param, params... _params)  {
+        void add_model(pathn* _param, params... _params)  {
 
             std::vector<pathn*>     variadic_vector;
 
@@ -50,7 +50,7 @@ namespace plnr
             (void) dummy;
             variadic_vector.insert(variadic_vector.begin(), _param);
 
-            return add_model(variadic_vector);
+            add_model(variadic_vector);
         }
     };
 }

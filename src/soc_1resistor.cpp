@@ -18,6 +18,7 @@ soc_1resistor::~soc_1resistor() { }
 vectorn soc_1resistor::get_value(double t, vectorn q) {
 
     vectorn dq(q.length());
+    dq.inherit_flags(q);
 
     dq.set(0, ((-1) * volt_internal +
         sqrt(pow(volt_internal, 2) - 4 * resistance_internal *
