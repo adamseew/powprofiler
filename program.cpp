@@ -17,8 +17,11 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 #include <iostream>
+#include <stdlib.h>
 #include <unistd.h>
 #include <fstream>
+#include <sstream>
+#include <string>
 
 using namespace plnr;
 using namespace std;
@@ -50,12 +53,60 @@ int main(int argc, char** argv) {
             if (!_sampler->dryrun()) {
                 delete _sampler;
 
-                throw runtime_error("unsupported architecture");
+                printf("unsupported architecture\n");
             }
         }
     }
 
     if (argc >= 2) {
+        ifstream file(argv[1]);
+        
+        if (file.is_open()) {
+            
+            string line;
+            getline(file, line);
+
+            if(utility_trim(line).compare("[combinations]") == 0) {
+
+                pathn* m_2l = NULL;
+
+                while (getline(file, line)) {
+                    vector<string> line_data = utility_split(line, '=');
+
+                    if (line_data.at(0).compare("name") == 0) {
+                        m_2l->save(line_data.at(1));
+                        exit(0);
+                    }
+
+
+                    pathn* m_1l = new pathn(line_data.at(0));
+                    line_data = utility_split(line_data.at(1), ',');
+                    
+                    int i = line_data.size();
+
+                    vectorn v(i + 2);
+
+                    for (i = 0; i < line_data.size(); i++) {
+                        v.set(i, atof(line_data.at(i).c_str()), static_cast<vectorn_flags>(static_cast<int>(vectorn_flags::problem_dimension) + i));
+                    }
+
+                    v.set(i, m_1l->avg().get(0), vectorn_flags::power);
+                    v.set(i + 1, m_1l->sum().get(0), vectorn_flags::energy);
+                        
+
+                    if (m_2l == NULL) {                        
+                        m_2l = new pathn(v);
+                    } else {
+                        m_2l->add(v);
+                    }
+                }
+
+                m_2l->save();
+                exit(0);
+            }
+            
+            file.close();
+        }
 
         _config = new config(argv[1]);
 
