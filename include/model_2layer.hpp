@@ -27,6 +27,8 @@ namespace plnr
     public:
         model_2layer(config* __config, profiler* __profiler, const component& __component);
 
+        model_2layer(config* __config, const component& __component);
+
         model_2layer(pathn* __model);
 
         ~model_2layer();

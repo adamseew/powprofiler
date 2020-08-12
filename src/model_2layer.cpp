@@ -29,6 +29,14 @@ model_2layer::model_2layer(config* __config, profiler* __profiler, const compone
     _model = nullptr;
 }
 
+model_2layer::model_2layer(config* __config, const component& __component) {
+
+    _component = __component;
+    _config = __config;
+    _profiler = nullptr;
+    _model = nullptr;
+}
+
 model_2layer::model_2layer(pathn* __model) {
 
     _config = nullptr;
