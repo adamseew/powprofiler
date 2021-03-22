@@ -33,6 +33,9 @@ namespace plnr
     
     private:
         struct _component {
+            _component(void) : 
+                name(""), src(""), size(0), runtime(0) { }
+
             std::string                         name,
                                                 src;
             int                                 size,
