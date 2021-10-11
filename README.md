@@ -1,5 +1,7 @@
 
-# PowProfiler
+# PowProfiler 
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5562457.svg)](https://doi.org/10.5281/zenodo.5562457)
 
 Or powprof is a profiling tool to build computation energy models for mobile robots, and generally, for power critical heterogeneous embedded devices. Born as a simple profiling tool for the companion computers of drones, it evolved to model energy, average power, and battery state of charge. It helps to understand the implications of the computations energy (i.e., the energy consumed by some energy-expensive computational tasks on the device) and optimize the software components in an energy-/battery- aware fashion, perhaps along with [the motion of a mobile robot](https://github.com/adamseew/energy-planning-paper).
 
