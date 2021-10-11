@@ -157,7 +157,7 @@ pathn* model_2layer::get_model() {
         for (j = 0; j < power_1layer.length(); j++)
             merged->set(i + j, power_1layer.get(j));
 
-        energy_1layer = _model_1layer->sum();
+        energy_1layer = _model_1layer->sum()/_config->get_frequency();
 
         for (j = 0; j < energy_1layer.length(); j++)
             merged->set(
